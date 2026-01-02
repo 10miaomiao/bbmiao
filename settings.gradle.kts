@@ -35,6 +35,8 @@ include( ":DanmakuFlameMaster")
 project(":DanmakuFlameMaster").projectDir = file("bilimiao/DanmakuFlameMaster")
 include(":bilimiao-comm")
 project(":bilimiao-comm").projectDir = file("bilimiao/bilimiao-comm")
+include(":bilimiao-download")
+project(":bilimiao-download").projectDir = file("bilimiao/bilimiao-download")
 
 include(":app")
  

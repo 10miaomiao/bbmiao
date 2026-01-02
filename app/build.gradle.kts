@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    id("kotlin-parcelize")
 }
 
 android {
@@ -52,6 +53,7 @@ dependencies {
     implementation(libs.androidx.media)
     implementation(libs.androidx.browser)
 
+    implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kodein.di) // 依赖注入
 
@@ -89,9 +91,12 @@ dependencies {
     implementation(libs.glide)
     annotationProcessor(libs.glide.compiler)
 
+    implementation(libs.mojito)
+    implementation(libs.mojito.sketch)
+    implementation(libs.mojito.glide)
 
     implementation(project(":bilimiao-comm"))
-//    implementation(project(":bilimiao-download"))
+    implementation(project(":bilimiao-download"))
 //    implementation(project(":bilimiao-cover"))
 //    implementation project(":bilimiao-appwidget")
     implementation(project(":miao-binding"))

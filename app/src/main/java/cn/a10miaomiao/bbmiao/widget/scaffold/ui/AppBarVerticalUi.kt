@@ -1,0 +1,244 @@
+package cn.a10miaomiao.bbmiao.widget.scaffold.ui
+
+import android.animation.*
+import android.content.Context
+import android.view.Gravity
+import android.view.View
+import android.view.ViewGroup
+import android.view.animation.AlphaAnimation
+import android.view.animation.Animation
+import android.view.animation.AnimationSet
+import android.view.animation.DecelerateInterpolator
+import android.view.animation.TranslateAnimation
+import android.widget.HorizontalScrollView
+import android.widget.LinearLayout
+import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
+import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
+import cn.a10miaomiao.bbmiao.style.config
+import cn.a10miaomiao.bbmiao.widget.scaffold.AppBarView
+import cn.a10miaomiao.bbmiao.widget.scaffold.MenuItemView
+import splitties.dimensions.dip
+import splitties.experimental.InternalSplittiesApi
+import splitties.views.backgroundColor
+import splitties.views.dsl.core.*
+import splitties.views.topPadding
+
+class AppBarVerticalUi(
+    override val ctx: Context,
+    val menuItemClick: View.OnClickListener,
+    val menuItemLongClick: View.OnLongClickListener,
+//    val backClick: View.OnClickListener,
+//    val backLongClick: View.OnLongClickListener,
+) : AppBarUi {
+
+    val mTitleHeight = ctx.config.appBarTitleHeight
+    val mMenuHeight = ctx.config.appBarMenuHeight
+
+    val mTitle = textView {
+        gravity = Gravity.CENTER
+        textSize = 12f
+        setTextColor(config.foregroundAlpha45Color)
+    }
+
+    private fun View.getInAnim(): Animator {
+        val trX = PropertyValuesHolder.ofFloat("translationX", 0f, 0f);
+        val trY = PropertyValuesHolder.ofFloat("translationY", 100f, 0f);
+        val trAlpha = PropertyValuesHolder.ofFloat("alpha", 0f, 1f);
+        return ObjectAnimator.ofPropertyValuesHolder(this, trY, trAlpha, trX);
+    }
+
+    private fun View.getOutAnim(): Animator {
+        val trX = PropertyValuesHolder.ofFloat("translationX", 0f, 0f)
+        val trY = PropertyValuesHolder.ofFloat("translationY", 0f, -100f)
+        val trAlpha = PropertyValuesHolder.ofFloat("alpha", 1f, 0f)
+        return ObjectAnimator.ofPropertyValuesHolder(this, trY, trAlpha, trX)
+    }
+
+    val mNavigationMemuLayout = horizontalLayout {
+        gravity = Gravity.CENTER_HORIZONTAL
+        val layoutTransition = LayoutTransition()
+
+        //View出現的動畫
+        //出现动画对LinearLayout.addView(View child, int index, LayoutParams params)方法无效
+        layoutTransition.setAnimator(LayoutTransition.APPEARING, getInAnim())
+//        layoutTransition.setAnimator(LayoutTransition.CHANGE_APPEARING, getInAnim())
+        //元素在容器中消失時需要動畫顯示
+        layoutTransition.setAnimator(LayoutTransition.DISAPPEARING, getOutAnim())
+//        layoutTransition.setAnimator(LayoutTransition.CHANGE_DISAPPEARING, getOutAnim())
+        layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
+        layoutTransition.setDuration(400)
+        layoutTransition.setInterpolator(LayoutTransition.DISAPPEARING, DecelerateInterpolator())
+        setLayoutTransition(layoutTransition)
+
+        topPadding = mTitleHeight
+    }
+
+    private val lineView = textView {
+        backgroundColor = ctx.config.colorSurfaceVariant
+    }
+
+    @OptIn(InternalSplittiesApi::class)
+    override val root = frameLayout {
+
+        addView(mTitle, lParams {
+            width = matchParent
+            height = mTitleHeight
+        })
+        addView(
+            view<HorizontalScrollView> {
+                scrollBarSize = 0
+                addView(
+                    mNavigationMemuLayout, lParams {
+                        width = matchParent
+                        height = mMenuHeight + mTitleHeight
+                    }
+                )
+            },
+            lParams {
+                gravity = Gravity.CENTER_HORIZONTAL
+                width = wrapContent
+                height = wrapContent
+            }
+        )
+        addView(lineView, lParams(matchParent, dip(1)))
+    }
+
+
+    override fun setProp(prop: AppBarView.PropInfo?) {
+        if (prop != null) {
+            mTitle.text = (prop.title ?: "").replace("\n", " ")
+            val menus = mutableListOf<MenuItemPropInfo>()
+            prop.navigationIcon?.let {
+                menus.add(
+                    MenuItemPropInfo(
+                        key = MenuKeys.back,
+                        title = "返回",
+                        iconResource = cn.a10miaomiao.bbmiao.R.drawable.ic_back_24dp
+                    )
+                )
+            }
+            prop.menus?.let { menus.addAll(it.reversed()) }
+            if (menus.isEmpty()) {
+                mNavigationMemuLayout.removeAllViews()
+            } else {
+                mNavigationMemuLayout.apply {
+                    var menuViewIndex = 0
+                    menus.forEachIndexed { index, prop ->
+                        val i = indexOfMenuItemViewByKey(prop.key, menuViewIndex)
+                        val menuItemView = getChildAt(i) as? MenuItemView
+                        if (menuItemView == null) {
+                            val view = newMenuItemView(ctx, prop)
+                            addView(
+                                view,
+                                menuViewIndex,
+                                lParams(wrapContent, matchParent)
+                            )
+                            view.startAnimation(translateMenuItemAniShow)
+                            menuViewIndex++
+                        } else {
+                            menuItemView.prop = prop
+                            if (i > menuViewIndex) {
+                                removeViews(menuViewIndex, i - menuViewIndex)
+                            }
+                            menuViewIndex++
+                        }
+                    }
+                    if (childCount > menuViewIndex) {
+                        removeViews(
+                            menuViewIndex,
+                            childCount - menuViewIndex
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    private fun ViewGroup.indexOfMenuItemViewByKey(key: Int?, start: Int = 0): Int {
+        if (start > childCount) return -1
+        for (i in start until childCount) {
+            val view = getChildAt(i) as? MenuItemView ?: return -1
+            if (view.prop.key == key) {
+                return i
+            }
+        }
+        return -1
+    }
+
+    private fun newMenuItemView(
+        context: Context,
+        data: MenuItemPropInfo,
+    ) = MenuItemView(context).apply {
+        orientation = LinearLayout.VERTICAL
+        minimumWidth = dip(60)
+        setBackgroundResource(config.selectableItemBackgroundBorderless)
+        setOnClickListener(menuItemClick)
+        if (data.key == MenuKeys.back) {
+            setOnLongClickListener(menuItemLongClick)
+        }
+        prop = data
+    }
+
+    override fun updateTheme() {
+        lineView.backgroundColor = ctx.config.colorSurfaceVariant
+    }
+
+    private val translateMenuItemAniShow = AnimationSet(false).apply {
+        addAnimation(TranslateAnimation(
+            0f, 0f,
+            100f, 0f,
+        ))
+        addAnimation(AlphaAnimation(0f, 1f))
+        duration = 400
+        repeatMode = Animation.REVERSE
+        interpolator = DecelerateInterpolator()
+    }
+
+    //向上位移显示动画  从自身位置的最下端向上滑动了自身的高度
+    private val translateAniShow = TranslateAnimation(
+        /* fromXType = */ Animation.RELATIVE_TO_SELF,
+        /* fromXValue = */ 0f,
+        /* toXType = */ Animation.RELATIVE_TO_SELF,
+        /* toXValue = */ 0f,
+        /* fromYType = */ Animation.RELATIVE_TO_SELF,
+        /* fromYValue = */ 1f,
+        /* toYType = */ Animation.RELATIVE_TO_SELF,
+        /* toYValue = */ 0f
+    ).apply {
+        repeatMode = Animation.REVERSE
+        duration = 400
+        interpolator = DecelerateInterpolator()
+    }
+
+    //向下位移隐藏动画  从自身位置的最上端向下滑动了自身的高度
+    private val translateAniHide = TranslateAnimation(
+        /* fromXType = */ Animation.RELATIVE_TO_SELF,
+        /* fromXValue = */ 0f,
+        /* toXType = */ Animation.RELATIVE_TO_SELF,
+        /* toXValue = */ 0f,
+        /* fromYType = */ Animation.RELATIVE_TO_SELF,
+        /* fromYValue = */ 0f,
+        /* toYType = */ Animation.RELATIVE_TO_SELF,
+        /* toYValue = */ 1f
+    ).apply {
+        repeatMode = Animation.REVERSE
+        duration = 400
+        interpolator = DecelerateInterpolator()
+        setAnimationListener(object : Animation.AnimationListener {
+            override fun onAnimationStart(animation: Animation) {}
+            override fun onAnimationEnd(animation: Animation) {
+                mNavigationMemuLayout.visibility = View.GONE
+            }
+            override fun onAnimationRepeat(animation: Animation) {}
+        })
+    }
+
+    fun showMenu() {
+        mNavigationMemuLayout.startAnimation(translateAniShow)
+        mNavigationMemuLayout.visibility = View.VISIBLE
+    }
+
+    fun hideMenu() {
+        mNavigationMemuLayout.startAnimation(translateAniHide)
+    }
+}

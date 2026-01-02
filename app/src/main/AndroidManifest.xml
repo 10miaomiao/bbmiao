@@ -2,7 +2,21 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.VIBRATE"/>
+    
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+
+
     <application
+        android:name=".Bilimiao"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -10,7 +24,7 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Bbmiao"
+        android:theme="@style/Theme.Bilimiao"
         tools:targetApi="31">
 
         <activity android:name=".MainActivity"
@@ -22,6 +36,44 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".activity.LogViewerActivity"
+            android:label="@string/density_setting"
+            android:theme="@style/Theme.Bilimiao"/>
+        <activity
+            android:name=".activity.SearchActivity"
+            android:label="@string/search"
+            android:theme="@style/Theme.Bilimiao"/>
+        <activity
+            android:name=".activity.DensitySettingActivity"
+            android:label="@string/density_setting"
+            android:theme="@style/Theme.Bilimiao"/>
+<!--        <activity-->
+<!--            android:name="cn.a10miaomiao.bilimiao.cover.CoverActivity"-->
+<!--            android:exported="true"-->
+<!--            android:label="@string/view_cover"-->
+<!--            android:theme="@style/Theme.TranslucentTheme">-->
+<!--            <intent-filter>-->
+<!--                <action android:name="android.intent.action.SEND" />-->
+
+<!--                <category android:name="android.intent.category.DEFAULT" />-->
+
+<!--                <data android:mimeType="text/plain" />-->
+<!--            </intent-filter>-->
+<!--        </activity>-->
+
+        <service
+            android:name=".service.PlaybackService"
+            android:exported="true"
+            android:foregroundServiceType="mediaPlayback"
+            android:permission="android.permission.BIND_MEDIA_BROWSER_SERVICE">
+            <intent-filter>
+                <action android:name="androidx.media3.session.MediaSessionService" />
+                <action android:name="android.media.browse.MediaBrowserService" />
+            </intent-filter>
+        </service>
+        <service
+            android:name="cn.a10miaomiao.bilimiao.download.DownloadService" />
     </application>
 
 </manifest>
