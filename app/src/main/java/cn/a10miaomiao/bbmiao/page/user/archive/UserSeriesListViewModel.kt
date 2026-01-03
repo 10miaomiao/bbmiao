@@ -1,41 +1,38 @@
-package cn.a10miaomiao.bbmiao.page.search.result
+package cn.a10miaomiao.bbmiao.page.user.archive
 
 import android.content.Context
-import android.net.Uri
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import cn.a10miaomiao.bbmiao.comm.MiaoBindingUi
-import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
-import com.a10miaomiao.bilimiao.comm.entity.comm.PaginationInfo
-import com.a10miaomiao.bilimiao.comm.entity.search.SearchBangumiInfo
-import com.a10miaomiao.bilimiao.comm.entity.search.SearchListInfo
 import cn.a10miaomiao.bbmiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.entity.ResponseData
+import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
+import com.a10miaomiao.bilimiao.comm.entity.comm.PaginationInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
-import com.a10miaomiao.bilimiao.comm.store.FilterStore
+import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
 
-class BangumiResultViewModel (
+class UserSeriesListViewModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
 
     val context: Context by instance()
     val ui: MiaoBindingUi by instance()
     val fragment: Fragment by instance()
-    val filterStore: FilterStore by instance()
+    val userStore: UserStore by instance()
 
-    val keyword by lazy { fragment.requireArguments().getString(MainNavArgs.text, "") }
+    val id by lazy { fragment.requireArguments().getString(MainNavArgs.id, "") }
+    val name by lazy { fragment.requireArguments().getString(MainNavArgs.name, "") }
 
-    var list = PaginationInfo<SearchBangumiInfo>()
     var triggered = false
+    var list = PaginationInfo<SeriesInfo>()
 
     init {
         loadData(1)
@@ -48,35 +45,22 @@ class BangumiResultViewModel (
             ui.setState {
                 list.loading = true
             }
-
-            val res = BiliApiService.searchApi
-                .searchBangumi(
-                    keyword = keyword,
-                    pageNum = pageNum,
-                    pageSize = list.pageSize
-                )
-                .awaitCall()
-                .json<ResponseData<SearchListInfo<SearchBangumiInfo>>>()
+            val res = BiliApiService.userApi.upperSeriesList(
+                id,
+                pageNum = pageNum,
+                pageSize = list.pageSize
+            ).awaitCall().json<ResponseData<DataInfo>>()
             if (res.code == 0) {
-                var result = res.requireData().items ?: listOf()
-                var totalCount = 0 // 屏蔽前数量
-                if (result.size < list.pageSize) {
-                    ui.setState { list.finished = true }
-                }
-                totalCount = result.size
-//                result = result.filter {
-//                    filterStore.filterUpper(it.param)
-//                }
+                val result = res.requireData()
                 ui.setState {
                     if (pageNum == 1) {
-                        list.data = arrayListOf()
+                        list.data = result.items.toMutableList()
+                    } else {
+                        list.data.addAll(result.items)
                     }
-                    list.data.addAll(result)
+                    list.finished = list.data.size >= result.page.total
                 }
                 list.pageNum = pageNum
-                if (list.data.size < 10 && totalCount != result.size) {
-                    _loadData(pageNum + 1)
-                }
             } else {
                 PopTip.show(res.message)
                 throw Exception(res.message)
@@ -94,9 +78,8 @@ class BangumiResultViewModel (
         }
     }
 
-
-    private fun _loadData(pageNum: Int = list.pageNum) {
-        loadData(pageNum)
+    private fun _loadData() {
+        loadData()
     }
 
     fun loadMore () {
@@ -115,4 +98,29 @@ class BangumiResultViewModel (
             loadData()
         }
     }
+
+    data class DataInfo(
+        val items: List<SeriesInfo>,
+        val page: PageInfo,
+    )
+
+    data class SeriesInfo(
+        val type: String,
+        val title: String,
+        val cover: String,
+        val param: String,
+        val uri: String,
+        val goto: String,
+        val count: Int,
+        val mtime: Long,
+        val is_pay: Boolean,
+    )
+
+    data class PageInfo(
+        val page_num: Int,
+        val page_size: Int,
+        val total: Int,
+    )
+
+
 }

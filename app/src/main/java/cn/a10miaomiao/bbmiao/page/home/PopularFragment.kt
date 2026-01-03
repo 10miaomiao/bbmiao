@@ -147,7 +147,7 @@ class PopularFragment: RecyclerViewFragment(), DIAware {
                         stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
                         setOnItemClickListener(handleItemClick)
                         loadMoreModule.setOnLoadMoreListener {
-                            viewModel.loadMode()
+                            viewModel.loadMore()
                         }
                     }
                     headerViews(mAdapter) {

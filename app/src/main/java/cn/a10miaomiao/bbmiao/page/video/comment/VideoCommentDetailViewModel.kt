@@ -172,7 +172,7 @@ class VideoCommentDetailViewModel(
         loadData()
     }
 
-    fun loadMode() {
+    fun loadMore() {
         val (loading, finished, pageNum) = this.list
         if (!finished && !loading) {
             loadData(pageNum = pageNum + 1)

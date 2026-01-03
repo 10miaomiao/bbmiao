@@ -1,4 +1,4 @@
-package cn.a10miaomiao.bbmiao.page.user.archive
+package cn.a10miaomiao.bbmiao.page.user.favourite
 
 import android.content.Context
 import android.os.Bundle
@@ -11,15 +11,14 @@ import androidx.lifecycle.coroutineScope
 import androidx.navigation.NavType
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import cn.a10miaomiao.miao.binding.android.view._bottomPadding
-import cn.a10miaomiao.miao.binding.android.view._leftPadding
-import cn.a10miaomiao.miao.binding.android.view._rightPadding
-import cn.a10miaomiao.miao.binding.android.view._topPadding
-import cn.a10miaomiao.bbmiao.R
-import cn.a10miaomiao.bbmiao.comm.*
-import com.a10miaomiao.bilimiao.comm.mypage.*
+import cn.a10miaomiao.bbmiao.comm._isRefreshing
+import cn.a10miaomiao.bbmiao.comm.connectUi
+import cn.a10miaomiao.bbmiao.comm.diViewModel
+import cn.a10miaomiao.bbmiao.comm.lazyUiDi
+import cn.a10miaomiao.bbmiao.comm.miaoBindingUi
 import cn.a10miaomiao.bbmiao.comm.navigation.FragmentNavigatorBuilder
 import cn.a10miaomiao.bbmiao.comm.navigation.MainNavArgs
 import cn.a10miaomiao.bbmiao.comm.navigation.openSearch
@@ -27,18 +26,32 @@ import cn.a10miaomiao.bbmiao.comm.recycler.GridAutofitLayoutManager
 import cn.a10miaomiao.bbmiao.comm.recycler._miaoAdapter
 import cn.a10miaomiao.bbmiao.comm.recycler._miaoLayoutManage
 import cn.a10miaomiao.bbmiao.comm.recycler.miaoBindingItemUi
-import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
+import cn.a10miaomiao.bbmiao.comm.wrapInSwipeRefreshLayout
 import cn.a10miaomiao.bbmiao.commponents.loading.ListState
 import cn.a10miaomiao.bbmiao.commponents.loading.listStateView
 import cn.a10miaomiao.bbmiao.commponents.video.videoItem
-import cn.a10miaomiao.bbmiao.style.config
+import cn.a10miaomiao.bbmiao.R
+import cn.a10miaomiao.miao.binding.android.view._bottomPadding
+import cn.a10miaomiao.miao.binding.android.view._leftPadding
+import cn.a10miaomiao.miao.binding.android.view._rightPadding
+import cn.a10miaomiao.miao.binding.android.view._topPadding
+import com.a10miaomiao.bilimiao.comm.*
+import com.a10miaomiao.bilimiao.comm.entity.media.MediasInfo
+import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
+import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
+import com.a10miaomiao.bilimiao.comm.mypage.MyPage
+import com.a10miaomiao.bilimiao.comm.mypage.SearchConfigInfo
+import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
+import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
+import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
+import cn.a10miaomiao.bbmiao.page.user.favourite.UserFavouriteDetailViewModel
 import cn.a10miaomiao.bbmiao.page.video.VideoInfoFragment
+import cn.a10miaomiao.bbmiao.style.config
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.chad.library.adapter.base.listener.OnItemClickListener
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.DIAware
-import org.kodein.di.bindSingleton
 import org.kodein.di.instance
 import splitties.dimensions.dip
 import splitties.views.backgroundColor
@@ -46,13 +59,14 @@ import splitties.views.dsl.core.frameLayout
 import splitties.views.dsl.core.matchParent
 import splitties.views.dsl.core.wrapContent
 import splitties.views.dsl.recyclerview.recyclerView
+import kotlin.collections.get
 
-class UserSearchArchiveListFragment  : Fragment(), DIAware, MyPage {
+class UserFavouriteDetailFragment : Fragment(), DIAware, MyPage {
 
     companion object : FragmentNavigatorBuilder() {
-        override val name = "user.archive.search"
+        override val name = "user.favourite.detail"
         override fun FragmentNavigatorDestinationBuilder.init() {
-            deepLink("bilimiao://user/{id}/search?name={name}&text={text}")
+            deepLink("bilimiao://user/fav/detail?id={id}&name={name}&keyword={text}")
             argument(MainNavArgs.id) {
                 type = NavType.StringType
                 nullable = false
@@ -63,13 +77,14 @@ class UserSearchArchiveListFragment  : Fragment(), DIAware, MyPage {
             }
             argument(MainNavArgs.text) {
                 type = NavType.StringType
-                nullable = false
+                nullable = true
+                defaultValue = ""
             }
         }
         fun createArguments(
             id: String,
             name: String,
-            keyword: String,
+            keyword: String = "",
         ): Bundle {
             return bundleOf(
                 MainNavArgs.id to id,
@@ -80,26 +95,29 @@ class UserSearchArchiveListFragment  : Fragment(), DIAware, MyPage {
     }
 
     override val pageConfig = myPageConfig {
-        title = if (viewModel.keyword?.isBlank() == true) {
-            "${viewModel.name}\n的\n投稿列表"
+        var searchTitle = "搜索"
+        if (viewModel.keyword?.isBlank() == true) {
+            title = viewModel.name
         } else {
-            "搜索\n-\n${viewModel.name}\n-\n${viewModel.keyword}"
+            title = "搜索\n-\n${viewModel.name}\n-\n${viewModel.keyword}"
+            searchTitle = "继续搜索"
         }
+        search = SearchConfigInfo(
+            name = "搜索${viewModel.name}",
+            keyword = viewModel.keyword ?: "",
+        )
         menus = listOf(
             myMenuItem {
                 key = MenuKeys.search
-                title = "继续搜索"
+                title = searchTitle
                 iconResource = R.drawable.ic_search_gray
             },
-        )
-        search = SearchConfigInfo(
-            name = "搜索投稿列表",
-            keyword = viewModel.keyword,
         )
     }
 
     override fun onMenuItemClick(view: View, menuItem: MenuItemPropInfo) {
-        when(menuItem.key) {
+        super.onMenuItemClick(view, menuItem)
+        when (menuItem.key) {
             MenuKeys.search -> {
                 requireActivity().openSearch(view)
             }
@@ -107,16 +125,25 @@ class UserSearchArchiveListFragment  : Fragment(), DIAware, MyPage {
     }
 
     override fun onSearchSelfPage(context: Context, keyword: String) {
-        viewModel.keyword = keyword
-        pageConfig.notifyConfigChanged()
-        viewModel.refreshList()
+        if (viewModel.keyword.isBlank()) {
+            findNavController().navigate(
+                UserFavouriteDetailFragment.actionId,
+                createArguments(
+                    viewModel.id,
+                    viewModel.name,
+                    keyword
+                )
+            )
+        } else {
+            viewModel.keyword = keyword
+            pageConfig.notifyConfigChanged()
+            viewModel.refreshList()
+        }
     }
 
-    override val di: DI by lazyUiDi(ui = { ui }) {
-        bindSingleton<MyPage> { this@UserSearchArchiveListFragment }
-    }
+    override val di: DI by lazyUiDi(ui = { ui })
 
-    private val viewModel by diViewModel<UserSearchArchiveListViewModel>(di)
+    private val viewModel by diViewModel<UserFavouriteDetailViewModel>(di)
 
     private val windowStore by instance<WindowStore>()
 
@@ -141,20 +168,19 @@ class UserSearchArchiveListFragment  : Fragment(), DIAware, MyPage {
 
     private val handleItemClick = OnItemClickListener { adapter, view, position ->
         val item = viewModel.list.data[position]
-        val args = VideoInfoFragment.createArguments(item.aid.toString())
+        val args = VideoInfoFragment.createArguments(item.id)
         Navigation.findNavController(view)
             .navigate(VideoInfoFragment.actionId, args)
     }
 
-    val itemUi = miaoBindingItemUi<bilibili.app.archive.v1.Arc> { item, index ->
+    val itemUi = miaoBindingItemUi<MediasInfo> { item, index ->
         videoItem (
             title = item.title,
-            pic = item.pic,
-            remark = NumberUtil.converCTime(item.ctime),
-            playNum = item.stat?.view.toString(),
-            damukuNum = item.stat?.danmaku.toString(),
+            pic = item.cover,
+            upperName = item.upper.name,
+            playNum = item.cnt_info.play,
+            damukuNum = item.cnt_info.danmaku,
             duration = NumberUtil.converDuration(item.duration),
-            isHtml = true,
         )
     }
 

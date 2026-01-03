@@ -159,7 +159,7 @@ class HistoryViewModel(
         loadData()
     }
 
-    fun loadMode() {
+    fun loadMore() {
         val (loading, finished, pageNum) = this.list
         if (!finished && !loading) {
             loadData(_maxId)

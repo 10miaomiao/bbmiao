@@ -224,7 +224,7 @@ class HistoryFragment : Fragment(), DIAware, MyPage {
                 setOnItemClickListener(handleItemClick)
                 setOnItemLongClickListener(handleItemLongClick)
                 loadMoreModule.setOnLoadMoreListener {
-                    viewModel.loadMode()
+                    viewModel.loadMore()
                 }
                 addHeaderView(headerView)
                 addFooterView(footerView)

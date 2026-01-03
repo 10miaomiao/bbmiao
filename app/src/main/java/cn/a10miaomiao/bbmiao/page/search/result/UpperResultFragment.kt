@@ -127,7 +127,7 @@ class UpperResultFragment : BaseResultFragment(), DIAware {
                         stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
                         setOnItemClickListener(handleItemClick)
                         loadMoreModule.setOnLoadMoreListener {
-                            viewModel.loadMode()
+                            viewModel.loadMore()
                         }
                         addFooterView(footerView)
                     }

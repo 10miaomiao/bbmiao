@@ -9,6 +9,7 @@ import cn.a10miaomiao.bbmiao.page.MainFragment
 //import cn.a10miaomiao.bbmiao.page.TestFragment
 import cn.a10miaomiao.bbmiao.page.web.WebFragment
 import cn.a10miaomiao.bbmiao.page.auth.H5LoginFragment
+import cn.a10miaomiao.bbmiao.page.bangumi.BangumiDetailFragment
 import cn.a10miaomiao.bbmiao.page.bangumi.BangumiPagesFragment
 import cn.a10miaomiao.bbmiao.page.download.DownloadVideoCreateFragment
 import cn.a10miaomiao.bbmiao.page.rank.RankFragment
@@ -19,7 +20,13 @@ import cn.a10miaomiao.bbmiao.page.search.result.VideoRegionFragment
 import cn.a10miaomiao.bbmiao.page.setting.*
 import cn.a10miaomiao.bbmiao.template.TemplateFragment
 import cn.a10miaomiao.bbmiao.page.user.*
+import cn.a10miaomiao.bbmiao.page.user.archive.UserArchiveListFragment
 import cn.a10miaomiao.bbmiao.page.user.archive.UserSearchArchiveListFragment
+import cn.a10miaomiao.bbmiao.page.user.archive.UserSeriesDetailFragment
+import cn.a10miaomiao.bbmiao.page.user.bangumi.MyBangumiFragment
+import cn.a10miaomiao.bbmiao.page.user.bangumi.UserBangumiFragment
+import cn.a10miaomiao.bbmiao.page.user.favourite.UserFavouriteDetailFragment
+import cn.a10miaomiao.bbmiao.page.user.favourite.UserFavouriteListFragment
 import cn.a10miaomiao.bbmiao.page.video.*
 import cn.a10miaomiao.bbmiao.page.video.comment.*
 import kotlin.reflect.KClass
@@ -71,14 +78,23 @@ object MainNavGraph {
             addFragment(ReplyDetailFragment::class, ReplyDetailFragment.Companion)
             addFragment(SendCommentFragment::class, SendCommentFragment.Companion)
 
+            addFragment(BangumiDetailFragment::class, BangumiDetailFragment.Companion)
             addFragment(BangumiPagesFragment::class, BangumiPagesFragment.Companion)
 
             addFragment(H5LoginFragment::class, H5LoginFragment.Companion)
 
+            addFragment(UserFragment::class, UserFragment.Companion)
+            addFragment(MyBangumiFragment::class, MyBangumiFragment.Companion)
+            addFragment(UserBangumiFragment::class, UserBangumiFragment.Companion)
+            addFragment(UserFavouriteListFragment::class, UserFavouriteListFragment.Companion)
+            addFragment(UserFavouriteDetailFragment::class, UserFavouriteDetailFragment.Companion)
+            addFragment(UserArchiveListFragment::class, UserArchiveListFragment.Companion)
             addFragment(UserSearchArchiveListFragment::class, UserSearchArchiveListFragment.Companion)
+            addFragment(UserSeriesDetailFragment::class, UserSeriesDetailFragment.Companion)
             addFragment(UserFollowFragment::class, UserFollowFragment.Companion)
             addFragment(HistoryFragment::class, HistoryFragment.Companion)
             addFragment(WatchLaterFragment::class, WatchLaterFragment.Companion)
+
 
             addFragment(SearchStartFragment::class, SearchStartFragment.Companion)
             addFragment(SearchResultFragment::class, SearchResultFragment.Companion)

@@ -40,6 +40,7 @@ import cn.a10miaomiao.bbmiao.commponents.comment.VideoCommentViewInfo
 import cn.a10miaomiao.bbmiao.commponents.comment.videoCommentView
 import cn.a10miaomiao.bbmiao.commponents.loading.ListState
 import cn.a10miaomiao.bbmiao.commponents.loading.listStateView
+import cn.a10miaomiao.bbmiao.page.user.UserFragment
 import cn.a10miaomiao.bbmiao.style.config
 import cn.a10miaomiao.bbmiao.page.video.VideoInfoFragment
 import com.a10miaomiao.bilimiao.store.WindowStore
@@ -262,9 +263,7 @@ class VideoCommentDetailFragment : RecyclerViewFragment(), DIAware, MyPage {
         val id = it.tag
         if (id != null && id is String) {
             val nav = Navigation.findNavController(it)
-//            nav.navigateToCompose(UserSpacePage()) {
-//                this.id set id
-//            }
+            nav.navigate(UserFragment.actionId, UserFragment.createArguments(id))
         }
     }
 
@@ -428,7 +427,7 @@ class VideoCommentDetailFragment : RecyclerViewFragment(), DIAware, MyPage {
                 setOnItemClickListener(handleItemClick)
                 setOnItemLongClickListener(handleItemLongClick)
                 loadMoreModule.setOnLoadMoreListener {
-                    viewModel.loadMode()
+                    viewModel.loadMore()
                 }
             }
 

@@ -98,7 +98,7 @@ class UpperResultViewModel(
         loadData(pageNum)
     }
 
-    fun loadMode () {
+    fun loadMore () {
         val (loading, finished, pageNum) = this.list
         if (!finished && !loading) {
             loadData(

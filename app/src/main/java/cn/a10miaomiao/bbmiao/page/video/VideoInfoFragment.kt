@@ -75,6 +75,7 @@ import cn.a10miaomiao.bbmiao.commponents.video.videoItem
 import cn.a10miaomiao.bbmiao.config.ViewStyle
 import cn.a10miaomiao.bbmiao.style.config
 import cn.a10miaomiao.bbmiao.page.search.SearchResultFragment
+import cn.a10miaomiao.bbmiao.page.user.UserFragment
 import cn.a10miaomiao.bbmiao.page.video.comment.VideoCommentListFragment
 import com.a10miaomiao.bilimiao.store.WindowStore
 import cn.a10miaomiao.bbmiao.widget._setContent
@@ -82,6 +83,7 @@ import cn.a10miaomiao.bbmiao.widget.expandableTextView
 import cn.a10miaomiao.bbmiao.widget.expandabletext.ExpandableTextView
 import cn.a10miaomiao.bbmiao.widget.expandabletext.app.LinkType
 import cn.a10miaomiao.bbmiao.widget.rcImageView
+import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
 import com.chad.library.adapter.base.listener.OnItemClickListener
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexWrap
@@ -353,30 +355,28 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
     }
 
     private fun toSelfLink(view: View, url: String) {
-//        val urlInfo = BiliUrlMatcher.findIDByUrl(url)
-//        val urlType = urlInfo[0]
-//        var urlId = urlInfo[1]
-//        if (urlType == "BV") {
-//            urlId = "BV$urlId"
-//        }
-//
-//        when (urlType) {
-//            "AV", "BV" -> {
-//                val args = createArguments(urlId)
-//                Navigation.findNavController(view)
-//                    .navigate(actionId, args)
-//            }
-//            else -> {
-//                BiliUrlMatcher.toUrlLink(view, url)
-//            }
-//        }
+        val urlInfo = BiliUrlMatcher.findIDByUrl(url)
+        val urlType = urlInfo[0]
+        var urlId = urlInfo[1]
+        if (urlType == "BV") {
+            urlId = "BV$urlId"
+        }
+
+        when (urlType) {
+            "AV", "BV" -> {
+                val args = createArguments(urlId)
+                Navigation.findNavController(view)
+                    .navigate(actionId, args)
+            }
+            else -> {
+                BiliUrlMatcher.toUrlLink(view, url)
+            }
+        }
     }
 
     private fun toUser(view: View, mid: String) {
-//        val nav = Navigation.findNavController(view)
-//        nav.navigateToCompose(UserSpacePage()) {
-//            this.id set mid
-//        }
+        val nav = Navigation.findNavController(view)
+        nav.navigate(UserFragment.actionId, UserFragment.createArguments(mid))
     }
 
     private val handleUpperClick = View.OnClickListener {

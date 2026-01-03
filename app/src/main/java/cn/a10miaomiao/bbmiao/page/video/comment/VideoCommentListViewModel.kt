@@ -111,7 +111,7 @@ class VideoCommentListViewModel(
         }
     }
 
-    fun loadMode() {
+    fun loadMore() {
         val (loading, finished) = this.list
         if (!finished && !loading) {
             loadData()
