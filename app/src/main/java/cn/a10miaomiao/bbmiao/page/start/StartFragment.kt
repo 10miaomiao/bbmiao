@@ -56,6 +56,7 @@ import cn.a10miaomiao.bbmiao.comm.recycler.miaoBindingItemUi
 import cn.a10miaomiao.bbmiao.comm.views
 import cn.a10miaomiao.bbmiao.comm.wrapInMaterialCardView
 import cn.a10miaomiao.bbmiao.config.ViewStyle
+import cn.a10miaomiao.bbmiao.page.user.UserFragment
 import cn.a10miaomiao.bbmiao.style.config
 import cn.a10miaomiao.bbmiao.page.video.VideoInfoFragment
 import com.a10miaomiao.bilimiao.store.WindowStore
@@ -286,14 +287,15 @@ class StartFragment : Fragment(), DIAware, MyPage {
         val nav = (activity as? MainActivity)?.pointerNav?.navController
             ?: requireActivity().findNavController(R.id.nav_host_fragment)
         val userStore = viewModel.userStore
-//        if (userStore.isLogin()) {
-//            val mid = userStore.state.info?.mid ?: return@OnClickListener
-//            nav.navigateToCompose(UserSpacePage()) {
-//                id set mid.toString()
-//            }
-//        } else {
+        if (userStore.isLogin()) {
+            val mid = userStore.state.info?.mid ?: return@OnClickListener
+            nav.navigate(
+                UserFragment.actionId,
+                UserFragment.createArguments(mid.toString())
+            )
+        } else {
 //            nav.navigateToCompose(LoginPage())
-//        }
+        }
         scaffoldView.closeDrawer()
     }
 

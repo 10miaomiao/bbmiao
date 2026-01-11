@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModel
 import cn.a10miaomiao.bbmiao.R
 import cn.a10miaomiao.bbmiao.comm.MiaoBindingUi
+import cn.a10miaomiao.bbmiao.page.setting.SettingFragment
 import com.a10miaomiao.bilimiao.comm.mypage.SearchConfigInfo
 import com.a10miaomiao.bilimiao.comm.store.MessageStore
 import com.a10miaomiao.bilimiao.comm.store.PlayListStore
@@ -78,15 +79,8 @@ class StartViewModel(
         ),
         StartNavInfo(
             title = "设置",
-            pageUrl = "",
+            pageUrl = "bilimiao://setting",
             iconRes = R.drawable.ic_nav_setting,
-            isComposePage = true,
-        ),
-        StartNavInfo(
-            title = "歌词",
-            pageUrl = "",
-            iconRes = R.drawable.ic_nav_lyric,
-            isComposePage = true,
         ),
     )
 

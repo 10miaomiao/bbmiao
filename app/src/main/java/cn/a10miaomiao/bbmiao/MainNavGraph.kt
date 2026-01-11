@@ -29,6 +29,11 @@ import cn.a10miaomiao.bbmiao.page.user.favourite.UserFavouriteDetailFragment
 import cn.a10miaomiao.bbmiao.page.user.favourite.UserFavouriteListFragment
 import cn.a10miaomiao.bbmiao.page.video.*
 import cn.a10miaomiao.bbmiao.page.video.comment.*
+import cn.a10miaomiao.bbmiao.page.setting.AboutFragment
+import cn.a10miaomiao.bbmiao.page.setting.SettingFragment
+import cn.a10miaomiao.bbmiao.page.setting.DanmakuSettingFragment
+import cn.a10miaomiao.bbmiao.page.setting.FlagsSeetingFragment
+import cn.a10miaomiao.bbmiao.page.setting.HomeSettingFragment
 import kotlin.reflect.KClass
 
 
@@ -102,7 +107,13 @@ object MainNavGraph {
 
             addFragment(DownloadVideoCreateFragment::class, DownloadVideoCreateFragment.Companion)
 
+            addFragment(AboutFragment::class, AboutFragment.Companion)
+            addFragment(DanmakuSettingFragment::class, DanmakuSettingFragment.Companion)
+            addFragment(HomeSettingFragment::class, HomeSettingFragment.Companion)
+            addFragment(SettingFragment::class, SettingFragment.Companion)
             addFragment(ThemeSettingFragment::class, ThemeSettingFragment.Companion)
+            addFragment(VideoSettingFragment::class, VideoSettingFragment.Companion)
+            addFragment(FlagsSeetingFragment::class, FlagsSeetingFragment.Companion)
         }
     }
 
