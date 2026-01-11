@@ -39,4 +39,4 @@ include(":bilimiao-download")
 project(":bilimiao-download").projectDir = file("bilimiao/bilimiao-download")
 
 include(":app")
- 
+include(":modernandroidpreferences")

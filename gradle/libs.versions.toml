@@ -29,6 +29,7 @@ microgSafeParcel = "1.7.1"
 # ui components
 recyclerview = "1.2.0"
 swiperefreshlayout = "1.1.0"
+constraintlayout = "2.1.4"
 baseRecyclerViewAdapterHelper = "3.0.4"
 flexbox = "3.0.0"
 foregroundCompat = "1.0.2"
@@ -77,6 +78,8 @@ glide-compiler = { group = "com.github.bumptech.glide", name = "compiler", versi
 kongzue-dialogx = { group = "com.github.kongzue", name = "DialogX", version.ref = "dialogX" }
 androidx-recyclerview = { group = "androidx.recyclerview", name = "recyclerview", version.ref = "recyclerview" }
 androidx-swiperefreshlayout = { group = "androidx.swiperefreshlayout", name = "swiperefreshlayout", version.ref = "swiperefreshlayout" }
+androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
+
 base-recyclerview-adapter-helper = { group = "com.github.CymChad", name = "BaseRecyclerViewAdapterHelper", version.ref = "baseRecyclerViewAdapterHelper" }
 google-android-flexbox = { group = "com.google.android.flexbox", name = "flexbox", version.ref = "flexbox" }
 foreground-compat = { group = "me.zhanghai.android.foregroundcompat", name = "library", version.ref = "foregroundCompat" }

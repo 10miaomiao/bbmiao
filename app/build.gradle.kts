@@ -95,6 +95,7 @@ dependencies {
     implementation(libs.mojito.sketch)
     implementation(libs.mojito.glide)
 
+    implementation(project(":modernandroidpreferences"))
     implementation(project(":bilimiao-comm"))
     implementation(project(":bilimiao-download"))
 //    implementation(project(":bilimiao-cover"))
