@@ -26,6 +26,7 @@ import com.a10miaomiao.bilimiao.comm.mypage.*
 import cn.a10miaomiao.bbmiao.comm.navigation.FragmentNavigatorBuilder
 import cn.a10miaomiao.bbmiao.comm.navigation.MainNavArgs
 import cn.a10miaomiao.bbmiao.comm.recycler.RecyclerViewFragment
+import cn.a10miaomiao.bbmiao.page.time.TimeSettingFragment
 import com.a10miaomiao.bilimiao.comm.store.TimeSettingStore
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.google.android.material.tabs.TabLayout
@@ -95,9 +96,8 @@ class RegionFragment : Fragment(), DIAware, MyPage {
                 pm.show()
             }
             MenuKeys.time -> {
-//                val nav =
-//                    requireActivity().findNavController(cn.a10miaomiao.bbmiao.R.id.nav_bottom_sheet_fragment)
-//                nav.navigateToCompose(TimeSettingPage())
+                val nav = requireActivity().findNavController(R.id.nav_bottom_sheet_fragment)
+                nav.navigate(TimeSettingFragment.actionId)
             }
         }
     }

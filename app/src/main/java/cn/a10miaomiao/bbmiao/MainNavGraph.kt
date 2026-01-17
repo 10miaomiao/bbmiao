@@ -34,6 +34,7 @@ import cn.a10miaomiao.bbmiao.page.setting.SettingFragment
 import cn.a10miaomiao.bbmiao.page.setting.DanmakuSettingFragment
 import cn.a10miaomiao.bbmiao.page.setting.FlagsSeetingFragment
 import cn.a10miaomiao.bbmiao.page.setting.HomeSettingFragment
+import cn.a10miaomiao.bbmiao.page.time.TimeSettingFragment
 import kotlin.reflect.KClass
 
 
@@ -70,6 +71,7 @@ object MainNavGraph {
             addFragment(TemplateFragment::class, TemplateFragment.Companion, dest.template)
             addFragment(WebFragment::class, WebFragment.Companion, dest.web)
 
+            addFragment(TimeSettingFragment::class, TimeSettingFragment.Companion)
             addFragment(RegionFragment::class, RegionFragment.Companion)
             addFragment(RankFragment::class, RankFragment.Companion)
 

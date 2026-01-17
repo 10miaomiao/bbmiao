@@ -22,8 +22,11 @@ import cn.a10miaomiao.bbmiao.comm.recycler._miaoAdapter
 import cn.a10miaomiao.bbmiao.comm.recycler.miaoBindingItemUi
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import cn.a10miaomiao.bbmiao.config.ViewStyle
+import cn.a10miaomiao.bbmiao.page.auth.H5LoginFragment
 import cn.a10miaomiao.bbmiao.style.config
 import cn.a10miaomiao.bbmiao.page.region.RegionFragment
+import cn.a10miaomiao.bbmiao.page.time.TimeSettingFragment
+import cn.a10miaomiao.bbmiao.page.user.UserFragment
 import com.a10miaomiao.bilimiao.store.WindowStore
 import cn.a10miaomiao.bbmiao.widget.wrapInLimitedFrameLayout
 import com.bumptech.glide.Glide
@@ -73,13 +76,14 @@ class HomeFragment : Fragment(), DIAware {
         if (userInfo != null) {
             // 跳转个人中心
             val nav = Navigation.findNavController(it)
-//            nav.navigateToCompose(UserSpacePage()){
-//                id set userInfo.mid.toString()
-//            }
+            nav.navigate(
+                UserFragment.actionId,
+                UserFragment.createArguments(userInfo.mid.toString())
+            )
         } else {
             // 跳转登录
             val nav = Navigation.findNavController(it)
-//            nav.navigateToCompose(LoginPage())
+            nav.navigate(H5LoginFragment.actionId)
         }
     }
 
@@ -87,7 +91,7 @@ class HomeFragment : Fragment(), DIAware {
         if (viewModel.userStore.state.info == null) {
             // 跳转登录
             val nav = Navigation.findNavController(it)
-//            nav.navigateToCompose(LoginPage())
+            nav.navigate(H5LoginFragment.actionId)
             true
         } else {
             false
@@ -96,9 +100,7 @@ class HomeFragment : Fragment(), DIAware {
 
     val handleTimeSettingClick = View.OnClickListener {
         val nav = requireActivity().findNavController(R.id.nav_bottom_sheet_fragment)
-//        nav.navigateToCompose(
-//            TimeSettingPage()
-//        )
+        nav.navigate(TimeSettingFragment.actionId)
     }
 
     val handleAdClick = View.OnClickListener {

@@ -21,6 +21,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavOptions
+import androidx.navigation.Navigation
 import androidx.navigation.findNavController
 import cn.a10miaomiao.miao.binding.android.view._bottomPadding
 import cn.a10miaomiao.miao.binding.android.view._leftPadding
@@ -56,6 +57,7 @@ import cn.a10miaomiao.bbmiao.comm.recycler.miaoBindingItemUi
 import cn.a10miaomiao.bbmiao.comm.views
 import cn.a10miaomiao.bbmiao.comm.wrapInMaterialCardView
 import cn.a10miaomiao.bbmiao.config.ViewStyle
+import cn.a10miaomiao.bbmiao.page.auth.H5LoginFragment
 import cn.a10miaomiao.bbmiao.page.user.UserFragment
 import cn.a10miaomiao.bbmiao.style.config
 import cn.a10miaomiao.bbmiao.page.video.VideoInfoFragment
@@ -286,15 +288,16 @@ class StartFragment : Fragment(), DIAware, MyPage {
         val scaffoldView = requireActivity().getScaffoldView()
         val nav = (activity as? MainActivity)?.pointerNav?.navController
             ?: requireActivity().findNavController(R.id.nav_host_fragment)
-        val userStore = viewModel.userStore
-        if (userStore.isLogin()) {
-            val mid = userStore.state.info?.mid ?: return@OnClickListener
+        val userInfo = viewModel.userStore.state.info
+        if (userInfo != null) {
+            // 跳转个人中心
             nav.navigate(
                 UserFragment.actionId,
-                UserFragment.createArguments(mid.toString())
+                UserFragment.createArguments(userInfo.mid.toString())
             )
         } else {
-//            nav.navigateToCompose(LoginPage())
+            // 跳转登录
+            nav.navigate(H5LoginFragment.actionId)
         }
         scaffoldView.closeDrawer()
     }
