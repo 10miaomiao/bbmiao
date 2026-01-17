@@ -64,6 +64,7 @@ import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerSource
 import com.a10miaomiao.bilimiao.comm.delegate.player.VideoPlayerSource
 import com.a10miaomiao.bilimiao.comm.dialogx.showTop
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
+import com.a10miaomiao.bilimiao.comm.store.UserLibraryStore
 import com.google.common.util.concurrent.MoreExecutors
 import com.kongzue.dialogx.dialogs.PopTip
 import com.shuyu.gsyvideoplayer.utils.GSYVideoType
@@ -76,6 +77,7 @@ import org.kodein.di.DIAware
 import org.kodein.di.instance
 import java.io.File
 import java.net.UnknownHostException
+import kotlin.getValue
 
 
 class PlayerDelegate2(
@@ -109,6 +111,7 @@ class PlayerDelegate2(
 
     private val userStore by instance<UserStore>()
     private val playerStore by instance<PlayerStore>()
+//    private val userLibraryStore by instance<UserLibraryStore>()
     private val windowStore by instance<WindowStore>()
     private val themeDelegate by instance<ThemeDelegate>()
 
@@ -127,6 +130,7 @@ class PlayerDelegate2(
     private val playerCoroutineScope = PlayerCoroutineScope()
 
     private var lastReportProgress = 0L // 最后记录的播放位置
+    private var lastBackPressedTime = 0L
 
     var playerSource: BasePlayerSource? = null
         private set(value) {
@@ -176,8 +180,11 @@ class PlayerDelegate2(
 
         // 主题监听
         themeDelegate.observeTheme(activity, Observer {
-            val themeColor = activity.config.themeColor
-            views.videoPlayer.updateThemeColor(activity, themeColor)
+//            val themeColor = it.toInt()
+//            views.videoPlayer.updateThemeColor(activity, themeColor)
+//            areaLimitBoxController.updateThemeColor(themeColor)
+//            errorMessageBoxController.updateThemeColor(themeColor)
+//            completionBoxController.updateThemeColor(themeColor)
         })
 
         if (isPlaying()) {
@@ -239,6 +246,17 @@ class PlayerDelegate2(
             controller.onBackClick()
             return true
         }
+        if (scaffoldApp.showPlayer) {
+            val now = System.currentTimeMillis()
+            if (now - lastBackPressedTime > 2000) {
+                PopTip.show("再按一次退出播放")
+                lastBackPressedTime = now
+            } else {
+                closePlayer()
+                lastBackPressedTime = 0
+            }
+            return true
+        }
         return false
     }
 
@@ -259,6 +277,8 @@ class PlayerDelegate2(
     ): MediaSource? {
         val dataSourceArr = dataSource.split("\n")
         val mediaMetadata = getMediaMetadata(dataSource)
+        val header = playerSourceInfo?.header ?: emptyMap()
+        val userAgent = header["User-Agent"] ?: DEFAULT_USER_AGENT
         return when (dataSourceArr[0]) {
             "[local-merging]" -> {
                 // 本地音视频分离
@@ -282,8 +302,7 @@ class PlayerDelegate2(
             "[merging]" -> {
                 // 音视频分离
                 val dataSourceFactory = DefaultHttpDataSource.Factory()
-                val header = getDefaultRequestProperties()
-                dataSourceFactory.setUserAgent(DEFAULT_USER_AGENT)
+                dataSourceFactory.setUserAgent(userAgent)
                 dataSourceFactory.setDefaultRequestProperties(header)
                 val videoMedia = MediaItem.Builder().apply {
                     setUri(dataSourceArr[1])
@@ -304,13 +323,12 @@ class PlayerDelegate2(
             "[concatenating]" -> {
                 // 视频拼接
                 val dataSourceFactory = DefaultHttpDataSource.Factory()
-                val header = getDefaultRequestProperties()
-                dataSourceFactory.setUserAgent(DEFAULT_USER_AGENT)
+                dataSourceFactory.setUserAgent(userAgent)
                 dataSourceFactory.setDefaultRequestProperties(header)
                 ConcatenatingMediaSource().apply {
                     for (i in 1 until dataSourceArr.size) {
                         val mediaItem = MediaItem.Builder().apply {
-                            setUri(dataSourceArr[2])
+                            setUri(dataSourceArr[i])
                             mediaMetadata?.let(::setMediaMetadata)
                         }.build()
                         addMediaSource(
@@ -324,8 +342,7 @@ class PlayerDelegate2(
             "[dash-mpd]" -> {
                 // Create a data source factory.
                 val dataSourceFactory = DefaultHttpDataSource.Factory()
-                val header = getDefaultRequestProperties()
-                dataSourceFactory.setUserAgent(DEFAULT_USER_AGENT)
+                dataSourceFactory.setUserAgent(userAgent)
                 dataSourceFactory.setDefaultRequestProperties(header)
                 // Create a DASH media source pointing to a DASH manifest uri.
                 val uri = Uri.parse(dataSourceArr[1])
@@ -351,7 +368,7 @@ class PlayerDelegate2(
 
     override fun getMediaMetadata(dataSource: String): MediaMetadata? {
         return playerSource?.let {
-            val artworkUri = Uri.parse(UrlUtil.autoHttps(it.coverUrl))
+            val artworkUri = Uri.parse(UrlUtil.autoHttps(it.coverUrl) + "@300w_300h_1c_")
             val metaData = MediaMetadata.Builder()
                 .setTitle(it.title)
                 .setArtworkUri(artworkUri)
@@ -373,19 +390,10 @@ class PlayerDelegate2(
         return null
     }
 
-    private fun getDefaultRequestProperties(): Map<String, String> {
-        val header = HashMap<String, String>()
-        if (playerSource is VideoPlayerSource) {
-            header["Referer"] = DEFAULT_REFERER
-        }
-        header["User-Agent"] = DEFAULT_USER_AGENT
-        return header
-    }
-
     internal fun historyReport(currentPosition: Long) {
-        if (!userStore.isLogin()) {
-            return
-        }
+//        if (!userStore.isLogin()) {
+//            return
+//        }
         // 5秒记录一次
         if (currentPosition > 0 && currentPosition - lastReportProgress < 5000) {
             return
@@ -447,15 +455,16 @@ class PlayerDelegate2(
             val sourceInfo = withContext(Dispatchers.IO) {
                 source.getPlayerUrl(quality, fnval)
             }
+            quality = sourceInfo.quality
+            playerSourceInfo = sourceInfo
             loadingBoxController.print("成功")
             views.videoPlayer.releaseDanmaku()
             views.videoPlayer.danmakuParser = danmukuParser
-            val header = getDefaultRequestProperties()
             views.videoPlayer.setUp(
                 sourceInfo.url,
                 false,
                 null,
-                header,
+                sourceInfo.header,
                 source.title
             )
             loadingBoxController.hideLoading()
@@ -507,8 +516,6 @@ class PlayerDelegate2(
                     }
                 }
             }
-            quality = sourceInfo.quality
-            playerSourceInfo = sourceInfo
         } catch (e: DabianException) {
             errorMessageBoxController.show("少儿不宜，禁止观看", canRetry = false)
         } catch (e: AreaLimitException) {
@@ -518,6 +525,7 @@ class PlayerDelegate2(
         } catch (e: UnknownHostException) {
             errorMessageBoxController.show("无法连接到御坂网络")
         } catch (e: Exception) {
+            e.printStackTrace()
             errorMessageBoxController.show(e.message ?: e.toString())
         }
     }
@@ -557,6 +565,10 @@ class PlayerDelegate2(
     fun reloadPlayer() {
         lastPosition = views.videoPlayer.currentPositionWhenPlaying
         playerCoroutineScope.launch(Dispatchers.Main) {
+            playerSource?.defaultPlayerSource?.let {
+                it.lastPlayCid = ""
+                it.lastPlayTime = 0L
+            }
             loadPlayerSource()
         }
     }
@@ -574,8 +586,8 @@ class PlayerDelegate2(
             playerSource = null
         }
         playerCoroutineScope.onCreate()
-        scaffoldApp.showPlayer = true
         playerSource = source
+        scaffoldApp.showPlayer = true
         setThumbImageView(source.coverUrl)
         activity.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         loadingBoxController.println("成功")
@@ -601,6 +613,7 @@ class PlayerDelegate2(
         }
         // 播放器是否默认全屏播放
         controller.checkIsPlayerDefaultFull()
+        // 是否显示分P和剧集按钮
         if (source is VideoPlayerSource && source.pages.size > 1) {
             views.videoPlayer.setExpandButtonText("分P")
             views.videoPlayer.showExpandButton()
@@ -610,6 +623,17 @@ class PlayerDelegate2(
         } else {
             views.videoPlayer.hideExpandButton()
         }
+        // 添加到用户库历史记录
+//        if (source is VideoPlayerSource) {
+//            userLibraryStore.appendHistory(
+//                UserLibraryStore.HistoryInfo(
+//                    aid = source.aid.toLong(),
+//                    title = source.mainTitle,
+//                    cover = source.coverUrl,
+//                    viewAt = System.currentTimeMillis(),
+//                )
+//            )
+//        }
     }
 
     override fun closePlayer() {
@@ -633,6 +657,10 @@ class PlayerDelegate2(
 
     override fun isPause(): Boolean {
         return views.videoPlayer.currentState == GSYVideoPlayer.CURRENT_STATE_PAUSE
+    }
+
+    override fun isOpened(): Boolean {
+        return scaffoldApp.showPlayer
     }
 
     override fun setWindowInsets(
@@ -678,10 +706,6 @@ class PlayerDelegate2(
                 }
             }
         }
-    }
-
-    override fun isOpened(): Boolean {
-       return scaffoldApp.showPlayer
     }
 
 
@@ -730,7 +754,7 @@ class PlayerDelegate2(
     }
 
     fun getVideoRatio(): Float? {
-        return playerSourceInfo?.screenProportion
+        return (playerSourceInfo ?: playerSource?.defaultPlayerSource)?.screenProportion
     }
 
     fun setHoldStatus(isHold: Boolean) {
