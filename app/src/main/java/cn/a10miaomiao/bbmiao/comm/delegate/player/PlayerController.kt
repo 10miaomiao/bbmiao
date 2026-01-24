@@ -268,13 +268,15 @@ class PlayerController(
     fun initDanmakuContext(
         preferences: Preferences
     ) {
-        val danmakuMode = currentDanmakuMode().let {
-            if (preferences[it.enable] == true) {
-                it
-            } else {
-                SettingPreferences.DanmakuDefault
-            }
-        }
+        val danmakuMode = currentDanmakuMode()
+        // bbmiao没有独立开关
+//            .let {
+//                if (preferences[it.enable] == true) {
+//                    it
+//                } else {
+//                    SettingPreferences.DanmakuDefault
+//                }
+//            }
         val danmakuShow = (preferences[SettingPreferences.DanmakuEnable] ?: true) &&
                 (preferences[danmakuMode.show] ?: true)
         views.videoPlayer.isShowDanmaku = danmakuShow
@@ -329,31 +331,38 @@ class PlayerController(
     private fun danmakuSwitchClick(view: View) {
         scope.launch {
             val danmakuMode = currentDanmakuMode()
-            val isEnable = SettingPreferences.mapData(activity) {
-                it[DanmakuEnable] ?: true
+            val show = !views.videoPlayer.isShowDanmaku
+            views.videoPlayer.isShowDanmaku = show
+            SettingPreferences.edit(activity) {
+                it[DanmakuEnable] = show
+                it[DanmakuDefault.show] = show
+                it[danmakuMode.show] = show
             }
-            if (isEnable) {
-                val show = !views.videoPlayer.isShowDanmaku
-                views.videoPlayer.isShowDanmaku = show
-                SettingPreferences.edit(activity) {
-                    it[DanmakuDefault.show] = show
-                    it[danmakuMode.show] = show
-                }
-            } else {
-                PopTip.show("弹幕功能已关闭，请手动打开", "打开")
-                    .showTop()
-                    .setButton { _, _ ->
-                        scope.launch {
-                            SettingPreferences.edit(activity) {
-                                it[DanmakuEnable] = true
-                                it[DanmakuDefault.show] = true
-                                it[danmakuMode.show] = true
-                            }
-                        }
-                        views.videoPlayer.isShowDanmaku = true
-                        false
-                    }
-            }
+//            val isEnable = SettingPreferences.mapData(activity) {
+//                it[DanmakuEnable] ?: true
+//            }
+//            if (isEnable) {
+//                val show = !views.videoPlayer.isShowDanmaku
+//                views.videoPlayer.isShowDanmaku = show
+//                SettingPreferences.edit(activity) {
+//                    it[DanmakuDefault.show] = show
+//                    it[danmakuMode.show] = show
+//                }
+//            } else {
+//                PopTip.show("弹幕功能已关闭，请手动打开", "打开")
+//                    .showTop()
+//                    .setButton { _, _ ->
+//                        scope.launch {
+//                            SettingPreferences.edit(activity) {
+//                                it[DanmakuEnable] = true
+//                                it[DanmakuDefault.show] = true
+//                                it[danmakuMode.show] = true
+//                            }
+//                        }
+//                        views.videoPlayer.isShowDanmaku = true
+//                        false
+//                    }
+//            }
         }
     }
 

@@ -191,9 +191,9 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
             myMenuItem {
                 key = 3
                 iconResource = if (viewModel.reqUserInfo?.favorite == 1) {
-                    R.drawable.ic_column_unstar
-                } else {
                     R.drawable.ic_column_star
+                } else {
+                    R.drawable.ic_column_unstar
                 }
                 val favoriteNum = NumberUtil.converStringOrNull(info?.stat?.fav)
                 title = favoriteNum ?: "收藏"
@@ -202,9 +202,9 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
             myMenuItem {
                 key = 4
                 iconResource = if (viewModel.reqUserInfo?.coin == 1) {
-                    R.drawable.ic_column_uncoin
-                } else {
                     R.drawable.ic_column_coin
+                } else {
+                    R.drawable.ic_column_uncoin
                 }
                 val coinNum = NumberUtil.converStringOrNull(info?.stat?.coin)
                 title = coinNum ?: "投币"
@@ -213,9 +213,9 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
             myMenuItem {
                 key = 5
                 iconResource = if (viewModel.reqUserInfo?.like == 1) {
-                    R.drawable.ic_column_unlike
-                } else {
                     R.drawable.ic_column_like
+                } else {
+                    R.drawable.ic_column_unlike
                 }
                 val likeNum = NumberUtil.converStringOrNull(info?.stat?.like)
                 title = likeNum ?: "点赞"

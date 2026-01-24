@@ -207,21 +207,17 @@ class UserFragment : Fragment(), DIAware, MyPage {
                 "favourite" -> {
                     val args =
                         UserFavouriteListFragment.createArguments(viewModel.id, info.card.name)
-//                    Navigation.findNavController(it)
-//                        .navigateToCompose(UserFavouritePage()) {
-//                            id set viewModel.id
-//                        }
+                    Navigation.findNavController(it)
+                        .navigate(UserFavouriteListFragment.actionId, args)
                 }
                 "attention" -> {
-                    val nav = it.findNavController()
-//                    if (viewModel.isSelf) {
-//                        nav.navigateToCompose(MyFollowPage())
-//                    } else {
-//                        nav.navigateToCompose(UserFollowPage()) {
-//                            id set viewModel.id
-//                        }
-//                    }
-
+                    val args = UserFollowFragment.createArguments(
+                        id = viewModel.id,
+                        type = "following",
+                        name = info.card.name,
+                    )
+                    Navigation.findNavController(it)
+                        .navigate(UserFollowFragment.actionId, args)
                 }
                 "fans" -> {
                     val args = UserFollowFragment.createArguments(

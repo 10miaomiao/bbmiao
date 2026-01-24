@@ -34,10 +34,9 @@ class StartViewModel(
     val navList = mutableListOf(
         StartNavInfo(
             title = "关注",
-            pageUrl = "",
+            pageUrl = "bilimiao://user/follow?id={mid}&type=following&name={name}",
             iconRes = R.drawable.ic_nav_following,
             isNeedAuth = true,
-            isComposePage = true,
         ),
         StartNavInfo(
             title = "粉丝",
@@ -47,29 +46,25 @@ class StartViewModel(
         ),
         StartNavInfo(
             title = "收藏",
-            pageUrl = "",
+            pageUrl = "bilimiao://user/fav/list?mid={mid}&name={name}",
             iconRes = R.drawable.ic_nav_fav,
             isNeedAuth = true,
-            isComposePage = true,
         ),
         StartNavInfo(
             title = "追番",
-            pageUrl = "",
+            pageUrl = "bilimiao://user/bangumi",
             iconRes = R.drawable.ic_nav_bangumi,
             isNeedAuth = true,
-            isComposePage = true,
         ),
-        StartNavInfo(
-            title = "下载",
-            pageUrl = "",
-            iconRes = R.drawable.ic_nav_download,
-            isComposePage = true,
-        ),
+//        StartNavInfo(
+//            title = "下载",
+//            pageUrl = "",
+//            iconRes = R.drawable.ic_nav_download,
+//        ),
         StartNavInfo(
             title = "历史",
             pageUrl = "bilimiao://history",
             iconRes = R.drawable.ic_nav_history,
-            isNeedAuth = true,
         ),
         StartNavInfo(
             title = "稍后看",
