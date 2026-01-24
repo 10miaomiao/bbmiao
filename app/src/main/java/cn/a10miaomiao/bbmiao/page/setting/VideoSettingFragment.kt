@@ -1,6 +1,7 @@
 package cn.a10miaomiao.bbmiao.page.setting
 
 import android.content.SharedPreferences
+import android.os.Build
 import android.os.Bundle
 import android.preference.PreferenceManager
 import android.view.LayoutInflater
@@ -26,6 +27,7 @@ import cn.a10miaomiao.miao.binding.android.view._rightPadding
 import cn.a10miaomiao.miao.binding.android.view._topPadding
 import cn.a10miaomiao.miao.binding.miaoEffect
 import cn.a10miaomiao.miao.binding.miaoMemo
+import com.a10miaomiao.bilimiao.comm.datastore.SettingConstants
 import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
 import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences.IsAutoCheckVersion
 import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences.IsBestRegion
@@ -38,6 +40,7 @@ import com.shuyu.gsyvideoplayer.player.PlayerFactory
 import de.Maxr1998.modernpreferences.PreferenceScreen
 import de.Maxr1998.modernpreferences.PreferencesAdapter
 import de.Maxr1998.modernpreferences.helpers.categoryHeader
+import de.Maxr1998.modernpreferences.helpers.multiIntChoice
 import de.Maxr1998.modernpreferences.helpers.onClick
 import de.Maxr1998.modernpreferences.helpers.pref
 import de.Maxr1998.modernpreferences.helpers.screen
@@ -68,25 +71,14 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage
         const val PLAYER_FNVAL = "player_fnval"
         const val PLAYER_BACKGROUND = "player_background"
         const val PLAYER_PROXY = "player_proxy"
-        const val PLAYER_AUTO_START = "player_auto_start"
-        const val PLAYER_AUTO_STOP = "player_auto_stop"
-        const val PLAYER_PLAYING_AUTO_REPLACE = "player_playing_auto_replace"
-        const val PLAYER_PAUSE_AUTO_REPLACE = "player_pause_auto_replace"
-        const val PLAYER_COMPLETE_AUTO_REPLACE = "player_complete_auto_replace"
         const val PLAYER_PLAYING_NOTIFICATION = "player_playing_notification"
+        const val PLAYER_OPEN_MODE = "player_open_mode"
         const val PLAYER_FULL_MODE = "player_full_mode"
-        const val PLAYER_VERTICAL_DEFAULT_FULL = "player_vertical_default_full"
-        const val PLAYER_HORIZONTAL_DEFAULT_FULL = "player_horizontal_default_full"
+        const val PLAYER_ORDER = "player_order"
+        const val PLAYER_ORDER_RANDOM = "player_order_random"
         const val PLAYER_SCREEN_TYPE = "player_screen_type"
         const val PLAYER_AUDIO_FOCUS = "player_audio_focus"
-
-        const val PLAYER_FULL_SHOW_BOTTOM_PROGRESS_BAR = "player_full_show_bottom_progress_bar"
-        const val PLAYER_SMALL_SHOW_BOTTOM_PROGRESS_BAR = "player_small_show_bottom_progress_bar"
-
-        const val PLAYER_AUTO_NEXT_VIDEO = "player_auto_next_video"
-        const val PLAYER_AUTO_NEXT_BANGUMI = "player_auto_next_bangumi"
-        const val PLAYLIST_RANDOM_NEXT = "playlist_random_next"
-        const val PLAYLIST_AUTO_REPLAY = "playlist_auto_replay"
+        const val PLAYER_BOTTOM_PROGRESS_BAR_SHOW = "player_bottom_progress_bar_show"
 
         const val PLAYER_AUTO_STOP_DURATION = "player_auto_stop_duration"
 
@@ -100,15 +92,9 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage
         const val FNVAL_MP4 = "2"
         const val FNVAL_DASH = "4048"
 
-        const val KEY_AUTO = "AUTO"
-        const val KEY_SENSOR_LANDSCAPE = "SENSOR_LANDSCAPE"
-        const val KEY_LANDSCAPE = "LANDSCAPE"
-        const val KEY_REVERSE_LANDSCAPE = "REVERSE_LANDSCAPE"
-        const val KEY_UNSPECIFIED = "UNSPECIFIED"
-
         const val PLAYER_SMALL_SHOW_AREA = "player_small_show_area"
         const val PLAYER_HOLD_SHOW_AREA = "player_hold_show_area"
-        const val FULL_SCREEN_DRAGGABLE = "full_screen_draggable"
+        const val PLAYER_SMALL_SCREEN_DRAGGABLE = "player_small_screen_draggable"
     }
 
     override val pageConfig = myPageConfig {
@@ -199,6 +185,28 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage
             ctx.dataStore.toSharedPreferences(
                 scope = lifecycleScope,
                 keysMap = mapOf(
+                    // 播放器设置
+                    PLAYER_BACKGROUND to PlayerBackground,
+                    PLAYER_AUDIO_FOCUS to PlayerAudioFocus,
+                    // 视频源设置
+                    PLAYER_FNVAL to PlayerFnval,
+                    // 播放控制设置
+                    PLAYER_PLAYING_NOTIFICATION to PlayerNotification,
+                    PLAYER_OPEN_MODE to PlayerOpenMode,
+                    PLAYER_ORDER to PlayerOrder,
+                    PLAYER_ORDER_RANDOM to PlayerOrderRandom,
+                    PLAYER_FULL_MODE to PlayerFullMode,
+                    PLAYER_BOTTOM_PROGRESS_BAR_SHOW to PlayerBottomProgressBarShow,
+//                    PLAYER_AUTO_STOP_DURATION to PlayerA,
+                    // 横屏状态小屏设置
+                    PLAYER_SMALL_SHOW_AREA to PlayerSmallShowArea,
+                    PLAYER_HOLD_SHOW_AREA to PlayerHoldShowArea,
+                    PLAYER_SMALL_SCREEN_DRAGGABLE to PlayerSmallDraggable,
+                    // 字幕显示设置
+                    PLAYER_SUBTITLE_SHOW to PlayerSubtitleShow,
+                    PLAYER_AI_SUBTITLE_SHOW to PlayerAiSubtitleShow,
+                    // 其他
+                    DanmakuSettingFragment.KEY_DANMAKU_SYS_FONT to DanmakuSysFont,
                 )
             )
         }
@@ -208,17 +216,8 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage
     suspend fun createRootScreen() = dataStoreScreen {
         collapseIcon = true
 
-        categoryHeader("0") {
+        categoryHeader("player") {
             title = "播放器设置"
-        }
-        val engineSelection = listOf(
-            SelectionItem(key = DECODER_DEFAULT, title = "默认"),
-            SelectionItem(key = DECODER_AV1, title = "AV1"),
-        )
-        singleChoice(PLAYER_DECODER, engineSelection) {
-            title = "解码器设置"
-            summary = "修改后重启播放器生效"
-            initialSelection = DECODER_DEFAULT
         }
 
         switch(PLAYER_BACKGROUND) {
@@ -233,7 +232,7 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage
             defaultValue = true
         }
 
-        categoryHeader("1") {
+        categoryHeader("source") {
             title = "视频源设置"
         }
 
@@ -248,88 +247,150 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage
             initialSelection = FNVAL_DASH
         }
 
-        pref(PLAYER_PROXY) {
-            title = "区域限制设置"
-            summary = "滴，出差卡"
+//        pref(PLAYER_PROXY) {
+//            title = "区域限制设置"
+//            summary = "滴，出差卡"
+//
+//            onClick {
+////                val nav = findNavController()
+////                nav.navigateToCompose(ProxySettingPage())
+//                true
+//            }
+//        }
 
-            onClick {
-//                val nav = findNavController()
-//                nav.navigateToCompose(ProxySettingPage())
-                true
-            }
-        }
-
-        categoryHeader("2") {
+        categoryHeader("control") {
             title = "播放控制设置"
         }
 
-        switch(PLAYER_AUTO_START) {
-            title = "打开详情页时自动打开播放器"
-            summary = "无正在播放视频，自动播放"
-            defaultValue = false
-        }
-
-        switch(PLAYER_PLAYING_AUTO_REPLACE) {
-            title = "自动替换播放中的视频"
-            summary = "正在播放视频时，打开新详情页自动开始播放新视频"
-            defaultValue = false
-        }
-
-        switch(PLAYER_PAUSE_AUTO_REPLACE) {
-            title = "自动替换暂停中的视频"
-            summary = "暂停播放视频时，打开新详情页自动开始播放新视频"
-            defaultValue = false
-        }
-
-        switch(PLAYER_COMPLETE_AUTO_REPLACE) {
-            title = "自动替换播放完成的视频"
-            summary = "完成视频播放时，打开新详情页自动开始播放新视频"
-            defaultValue = false
-        }
-
-
-        switch(PLAYER_AUTO_STOP) {
-            title = "关闭详情页时自动关闭播放器"
-            summary = "呐呐呐呐呐呐呐呐呐"
-            defaultValue = false
-        }
-
         switch(PLAYER_PLAYING_NOTIFICATION) {
-            title = "播放时通知栏显示控制器"
+            title = "显示通知栏播放器控制器"
             summary = "这个家里已经没有你的位置啦！"
             defaultValue = true
         }
 
+        val openModeSelection = listOf(
+            SelectionItem(
+                key = SettingConstants.PLAYER_OPEN_MODE_AUTO_PLAY,
+                title = "无视频播放时，自动播放"
+            ),
+            SelectionItem(
+                key = SettingConstants.PLAYER_OPEN_MODE_AUTO_REPLACE,
+                title = "正在播放时，自动替换播放"
+            ),
+            SelectionItem(
+                key = SettingConstants.PLAYER_OPEN_MODE_AUTO_REPLACE_PAUSE,
+                title = "暂停播放时，自动替换播放"
+            ),
+            SelectionItem(
+                key = SettingConstants.PLAYER_OPEN_MODE_AUTO_REPLACE_COMPLETE,
+                title = "完成播放时，自动替换播放"
+            ),
+            SelectionItem(
+                key = SettingConstants.PLAYER_OPEN_MODE_AUTO_CLOSE,
+                title = "退出详情页时，自动关闭"
+            ),
+            SelectionItem(
+                key = SettingConstants.PLAYER_OPEN_MODE_AUTO_FULL_SCREEN,
+                title = "设备竖屏状态时，自动全屏播放"
+            ),
+            SelectionItem(
+                key = SettingConstants.PLAYER_OPEN_MODE_AUTO_FULL_SCREEN_LANDSCAPE,
+                title = "设备横屏状态时，自动全屏播放"
+            ),
+        )
+        multiIntChoice(PLAYER_OPEN_MODE, openModeSelection) {
+            title = "播放器自动控制"
+            summary = "打开或关闭视频详情时自动进行的操作"
+        }
+
+        val orderSelection =  listOf(
+            SelectionItem(
+                key = SettingConstants.PLAYER_ORDER_LOOP,
+                title = "循环播放（有勾选下列选项时为列表循环，无勾选时为单个循环）"
+            ),
+            SelectionItem(
+                key = SettingConstants.PLAYER_ORDER_NEXT_P,
+                title = "自动下一P"
+            ),
+            SelectionItem(
+                key = SettingConstants.PLAYER_ORDER_NEXT_VIDEO,
+                title = "自动下一个视频"
+            ),
+            SelectionItem(
+                key = SettingConstants.PLAYER_ORDER_NEXT_EPISODE,
+                title = "自动下一集（番剧）"
+            ),
+        )
+        multiIntChoice(PLAYER_ORDER, orderSelection) {
+            title = "播放器播放顺序"
+            summary = "可以多个选项组合选择"
+        }
+        switch(PLAYER_ORDER_RANDOM) {
+            title = "随机播放"
+            summary = "播放完一个视频后，随机播放下一个视频，单个视频循环时无效"
+            defaultValue = false
+        }
+
         val fullModeSelection = listOf(
-            SelectionItem(key = KEY_AUTO, title = "跟随视频"),
-            SelectionItem(key = KEY_UNSPECIFIED, title = "跟随系统"),
-            SelectionItem(key = KEY_SENSOR_LANDSCAPE, title = "横向全屏(自动旋转)"),
-            SelectionItem(key = KEY_LANDSCAPE, title = "横向全屏(固定方向1)"),
-            SelectionItem(key = KEY_REVERSE_LANDSCAPE, title = "横向全屏(固定方向2)"),
+            SelectionItem(
+                key = SettingConstants.PLAYER_FULL_MODE_AUTO,
+                title = "跟随视频"
+            ),
+            SelectionItem(
+                key = SettingConstants.PLAYER_FULL_MODE_UNSPECIFIED,
+                title = "跟随系统"
+            ),
+            SelectionItem(
+                key = SettingConstants.PLAYER_FULL_MODE_SENSOR_LANDSCAPE,
+                title = "横向全屏(自动旋转)"
+            ),
+            SelectionItem(
+                key = SettingConstants.PLAYER_FULL_MODE_LANDSCAPE,
+                title = "横向全屏(固定方向1)"
+            ),
+            SelectionItem(
+                key = SettingConstants.PLAYER_FULL_MODE_REVERSE_LANDSCAPE,
+                title = "横向全屏(固定方向2)"
+            ),
         )
         singleChoice(PLAYER_FULL_MODE, fullModeSelection) {
             title = "全屏播放设置"
-            summary = ""
-            initialSelection = KEY_AUTO
+            summary = "可以在播放器长按全屏按钮召唤此选项"
+            initialSelection = SettingConstants.PLAYER_FULL_MODE_AUTO
         }
 
-        switch(PLAYER_VERTICAL_DEFAULT_FULL) {
-            title = "竖屏时播放器默认全屏播放"
-            summary = ""
-            defaultValue = false
+         val bottomProgressBarShowSelection = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+             listOf(
+                 SelectionItem(
+                     key = SettingConstants.PLAYER_BOTTOM_PROGRESS_BAR_SHOW_IN_SMALL,
+                     title = "小屏播放时，显示底部进度条"
+                 ),
+                 SelectionItem(
+                     key = SettingConstants.PLAYER_BOTTOM_PROGRESS_BAR_SHOW_IN_FULL,
+                     title = "全屏播放时，显示底部进度条"
+                 ),
+                 SelectionItem(
+                     key = SettingConstants.PLAYER_BOTTOM_PROGRESS_BAR_SHOW_IN_PIP,
+                     title = "画中画(应用外小窗)模式，显示底部进度条"
+                 ),
+             )
+        } else {
+             listOf(
+                SelectionItem(
+                    key = SettingConstants.PLAYER_BOTTOM_PROGRESS_BAR_SHOW_IN_SMALL,
+                    title = "小屏播放时，显示底部进度条"
+                ),
+                SelectionItem(
+                    key = SettingConstants.PLAYER_BOTTOM_PROGRESS_BAR_SHOW_IN_FULL,
+                    title = "全屏播放时，显示底部进度条"
+                ),
+            )
         }
-
-        switch(PLAYER_HORIZONTAL_DEFAULT_FULL) {
-            title = "横屏时播放器默认全屏播放"
+        multiIntChoice(PLAYER_BOTTOM_PROGRESS_BAR_SHOW, bottomProgressBarShowSelection) {
+            title = "底部进度条显示控制"
             summary = ""
-            defaultValue = false
         }
-
-        switch(PLAYER_AUTO_NEXT_VIDEO) {
-            title = "视频自动播放下一P"
-            summary = ""
-            defaultValue = true
-        }
+        // TODO: 自定义倍速菜单
 
         seekBar(PLAYER_AUTO_STOP_DURATION) {
             title = "播放器定时关闭"
@@ -350,36 +411,15 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage
             }
         }
 
-        switch(PLAYER_AUTO_NEXT_BANGUMI) {
-            title = "番剧自动播放下一集"
-            summary = ""
-            defaultValue = true
+        categoryHeader("small") {
+            title = "横屏状态小屏设置"
         }
 
-//        switch(PLAYLIST_RANDOM_NEXT) {
-//            title = "收藏夹列表随机播放"
-//            summary = ""
-//            defaultValue = false
-//        }
-//
-//        switch(PLAYLIST_AUTO_REPLAY) {
-//            title = "收藏夹列表单集循环"
-//            summary = "优先级高于随机播放"
-//            defaultValue = false
-//        }
-
-        switch(PLAYER_FULL_SHOW_BOTTOM_PROGRESS_BAR) {
-            title = "全屏时显示底部进度条"
-            summary = ""
-            defaultValue = true
+        switch(PLAYER_SMALL_SCREEN_DRAGGABLE) {
+            title = "小屏时整个屏幕可拖拽"
+            summary = "启用后，小屏状态时播放器手势无效"
+            defaultValue = false
         }
-
-        switch(PLAYER_SMALL_SHOW_BOTTOM_PROGRESS_BAR) {
-            title = "小屏时显示底部进度条"
-            summary = ""
-            defaultValue = true
-        }
-
         seekBar(PLAYER_SMALL_SHOW_AREA) {
             title = "横屏时小屏播放面积"
             default = 480
@@ -387,7 +427,6 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage
             min = 150
             formatter = { it.toString() }
         }
-
         seekBar(PLAYER_HOLD_SHOW_AREA) {
             title = "小屏挂起后播放面积"
             default = 130
@@ -396,13 +435,7 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage
             formatter = { it.toString() }
         }
 
-        switch(FULL_SCREEN_DRAGGABLE) {
-            title = "小屏时整个屏幕可拖拽"
-            summary = ""
-            defaultValue = false
-        }
-
-        categoryHeader("3") {
+        categoryHeader("subtitle") {
             title = "字幕显示设置"
         }
 
@@ -415,19 +448,20 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage
 
         switch(PLAYER_AI_SUBTITLE_SHOW) {
             title = "AI字幕显示"
-            summary = "无论什么字幕都显示"
+            summary = "此AI字幕是指UP主手动生成的AI字幕，并非每个视频都有"
             summaryDisabled = "字幕功能已关闭"
             defaultValue = false
         }
 
-        categoryHeader("其它") {
+        categoryHeader("other") {
             title = "其它"
         }
-//        switch(DanmakuSettingFragment.KEY_DANMAKU_SYS_FONT) {
-//            title = "弹幕使用系统字体"
-//            summary = "修改后需重启APP生效"
-//            defaultValue = false
-//        }
+
+        switch(DanmakuSettingFragment.KEY_DANMAKU_SYS_FONT) {
+            title = "弹幕使用系统字体"
+            summary = "修改后需重启APP生效"
+            defaultValue = false
+        }
 
 
 

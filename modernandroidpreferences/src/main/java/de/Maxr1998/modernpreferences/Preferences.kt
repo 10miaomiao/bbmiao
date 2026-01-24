@@ -309,6 +309,19 @@ open class Preference(key: String) : AbstractPreference(key) {
     }
 
     /**
+     * Save an int for this [Preference]s' [key] to the [SharedPreferences] of the attached [PreferenceScreen]
+     */
+    fun commitFloat(value: Float) {
+        prefs?.edit {
+            putFloat(key, value)
+        }
+    }
+
+    fun getFloat(defaultValue: Float): Float {
+        return prefs?.getFloat(key, defaultValue) ?: defaultValue
+    }
+
+    /**
      * Save a boolean for this [Preference]s' [key] to the [SharedPreferences] of the attached [PreferenceScreen]
      */
     fun commitBoolean(value: Boolean) {

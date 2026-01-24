@@ -150,6 +150,10 @@ class HomeSettingFragment : Fragment(), DIAware, MyPage
             ctx.dataStore.toSharedPreferences(
                 scope = lifecycle.coroutineScope,
                 keysMap = mapOf(
+                    "home_recommend_show" to HomeRecommendShow,
+                    "home_popular_show" to HomePopularShow,
+                    "home_popular_carry_token" to HomePopularCarryToken,
+                    "home_recommend_list_style" to HomeRecommendListStyle,
                 )
             )
         }
@@ -188,13 +192,13 @@ class HomeSettingFragment : Fragment(), DIAware, MyPage
         }
 
         val recommendListStyleSelection = listOf(
-            SelectionItem(key = "0", title = "详情为主"),
-            SelectionItem(key = "1", title = "封面为主"),
+            SelectionItem(key = 0, title = "详情为主"),
+            SelectionItem(key = 1, title = "封面为主"),
         )
         singleChoice("home_recommend_list_style", recommendListStyleSelection) {
             title = "列表样式"
             summary = "修改后需重启APP"
-            initialSelection = "0"
+            initialSelection = 0
         }
 
     }

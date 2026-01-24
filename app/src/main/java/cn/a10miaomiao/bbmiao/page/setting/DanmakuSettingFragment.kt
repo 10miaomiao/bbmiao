@@ -14,6 +14,7 @@ import android.view.ViewGroup
 import android.widget.CompoundButton
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavType
 import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
 import androidx.viewpager2.adapter.FragmentStateAdapter
@@ -32,6 +33,9 @@ import cn.a10miaomiao.miao.binding.android.view._leftPadding
 import cn.a10miaomiao.miao.binding.android.view._rightPadding
 import cn.a10miaomiao.miao.binding.android.view._show
 import cn.a10miaomiao.miao.binding.android.view._topPadding
+import cn.a10miaomiao.miao.binding.android.widget._isChecked
+import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
+import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences.dataStore
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
@@ -39,6 +43,8 @@ import com.a10miaomiao.bilimiao.store.WindowStore
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import de.Maxr1998.modernpreferences.PreferencesAdapter
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
@@ -52,8 +58,7 @@ import splitties.views.dsl.core.verticalLayout
 import splitties.views.dsl.core.view
 import splitties.views.dsl.core.wrapContent
 
-class DanmakuSettingFragment : Fragment(), DIAware, MyPage,
-    SharedPreferences.OnSharedPreferenceChangeListener {
+class DanmakuSettingFragment : Fragment(), DIAware, MyPage {
 
     companion object : FragmentNavigatorBuilder() {
         const val UPDATE_ACTION =
@@ -97,18 +102,16 @@ class DanmakuSettingFragment : Fragment(), DIAware, MyPage,
         const val KEY_DANMAKU_FT_MAX_LINE = "danmaku_ft_smax_line"
         const val KEY_DANMAKU_FB_MAX_LINE = "danmaku_fb_max_line"
         const val KEY_DANMAKU_SYS_FONT = "danmaku_sys_font"
-        fun generateKey(key: String, mode: Int): String {
-            return "${key}__${mode}__"
-        }
 
-        fun setDanmaKuShow(context: Context, isShow: Boolean) {
-            val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-            prefs.edit().also {
-                it.putBoolean(KEY_DANMAKU_SHOW, isShow)
-            }.apply()
+        fun getPreferences(mode: Int): SettingPreferences.Danmaku {
+            return when (mode) {
+                MODE_SMALL -> SettingPreferences.DanmakuSmallMode
+                MODE_FULL -> SettingPreferences.DanmakuFullMode
+                MODE_PIC_IN_PIC -> SettingPreferences.DanmakuPipMode
+                else -> SettingPreferences.DanmakuDefault
+            }
         }
     }
-
 
     override val pageConfig = myPageConfig {
         title = "弹幕设置"
@@ -118,17 +121,7 @@ class DanmakuSettingFragment : Fragment(), DIAware, MyPage,
 
     private val windowStore by instance<WindowStore>()
 
-    private val basePlayerDelegate by instance<BasePlayerDelegate>()
-
-    private var mPreferencesAdapter: PreferencesAdapter? = null
-
     private var danmakuEnabled = true
-
-//    private val mBroadcastReceiver = object : BroadcastReceiver() {
-//        override fun onReceive(context: Context, intent: Intent) {
-//            update(context)
-//        }
-//    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -143,14 +136,13 @@ class DanmakuSettingFragment : Fragment(), DIAware, MyPage,
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initView(view)
-        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-        prefs.registerOnSharedPreferenceChangeListener(this)
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-        prefs.unregisterOnSharedPreferenceChangeListener(this)
+        lifecycleScope.launch {
+            requireContext().dataStore.data.map {
+                it[SettingPreferences.DanmakuEnable]
+            }.collect {
+                setDanmakuEnabled(it ?: true)
+            }
+        }
     }
 
     private fun initView(view: View) {
@@ -205,22 +197,17 @@ class DanmakuSettingFragment : Fragment(), DIAware, MyPage,
             viewPager.setCurrentItem(tabIndex, false)
             tabLayout.getTabAt(tabIndex)?.select()
         }
-        update()
     }
 
-    private fun update() {
-        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-        val isShow = prefs.getBoolean(KEY_DANMAKU_SHOW, true)
+    private fun setDanmakuEnabled(enabled: Boolean) {
         ui.setState {
-            danmakuEnabled = isShow
+            danmakuEnabled = enabled
         }
     }
 
     private val handleCheckedChangeListener =
         CompoundButton.OnCheckedChangeListener { _, isChecked ->
-            Handler(Looper.getMainLooper()).postDelayed({
-                setDanmaKuShow(requireContext(), isChecked)
-            }, 500)
+            setDanmakuEnabled(isChecked)
         }
 
     @OptIn(InternalSplittiesApi::class)
@@ -260,6 +247,7 @@ class DanmakuSettingFragment : Fragment(), DIAware, MyPage,
                     views {
                         +switch {
                             text = "弹幕功能已关闭"
+                            _isChecked = danmakuEnabled
                             setOnCheckedChangeListener(handleCheckedChangeListener)
                         }..lParams {
                             gravity = Gravity.CENTER
@@ -269,12 +257,6 @@ class DanmakuSettingFragment : Fragment(), DIAware, MyPage,
             }
         }
 
-    }
-
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        if (key == KEY_DANMAKU_SHOW) {
-            update()
-        }
     }
 
 }

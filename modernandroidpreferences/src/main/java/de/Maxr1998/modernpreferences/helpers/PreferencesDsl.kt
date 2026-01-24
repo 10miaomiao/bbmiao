@@ -35,8 +35,10 @@ import de.Maxr1998.modernpreferences.preferences.SwitchPreference
 import de.Maxr1998.modernpreferences.preferences.TwoStatePreference
 import de.Maxr1998.modernpreferences.preferences.choice.AbstractSingleChoiceDialogPreference
 import de.Maxr1998.modernpreferences.preferences.choice.MultiChoiceDialogPreference
+import de.Maxr1998.modernpreferences.preferences.choice.MultiIntChoiceDialogPreference
 import de.Maxr1998.modernpreferences.preferences.choice.SelectionItem
 import de.Maxr1998.modernpreferences.preferences.choice.SingleChoiceDialogPreference
+import de.Maxr1998.modernpreferences.preferences.choice.SingleFloatChoiceDialogPreference
 import de.Maxr1998.modernpreferences.preferences.choice.SingleIntChoiceDialogPreference
 
 // PreferenceScreen DSL functions
@@ -108,6 +110,14 @@ inline fun PreferenceScreen.Appendable.singleChoice(
     return SingleIntChoiceDialogPreference(key, items).apply(block).also(::addPreferenceItem)
 }
 
+inline fun PreferenceScreen.Appendable.singleChoice(
+    key: String,
+    items: List<SelectionItem<Float>>,
+    block: SingleFloatChoiceDialogPreference.() -> Unit,
+): SingleFloatChoiceDialogPreference {
+    return SingleFloatChoiceDialogPreference(key, items).apply(block).also(::addPreferenceItem)
+}
+
 inline fun PreferenceScreen.Appendable.multiChoice(
     key: String,
     items: List<SelectionItem<String>>,
@@ -115,6 +125,15 @@ inline fun PreferenceScreen.Appendable.multiChoice(
 ): MultiChoiceDialogPreference {
     return MultiChoiceDialogPreference(key, items).apply(block).also(::addPreferenceItem)
 }
+
+inline fun PreferenceScreen.Appendable.multiIntChoice(
+    key: String,
+    items: List<SelectionItem<Int>>,
+    block: MultiIntChoiceDialogPreference.() -> Unit,
+): MultiIntChoiceDialogPreference {
+    return MultiIntChoiceDialogPreference(key, items).apply(block).also(::addPreferenceItem)
+}
+
 
 inline fun PreferenceScreen.Appendable.editText(key: String, block: EditTextPreference.() -> Unit): EditTextPreference {
     return EditTextPreference(key).apply(block).also(::addPreferenceItem)

@@ -62,17 +62,9 @@ class DanmakuSettingDetailFragment : Fragment(), DIAware, MyPage {
 
     private val windowStore by instance<WindowStore>()
 
-    private val basePlayerDelegate by instance<BasePlayerDelegate>()
-
     private val mode by lazy { requireArguments().getInt("mode") }
 
     private var mPreferencesAdapter: PreferencesAdapter? = null
-
-    private val mBroadcastReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            update(context)
-        }
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -97,33 +89,11 @@ class DanmakuSettingDetailFragment : Fragment(), DIAware, MyPage {
         }
     }
 
-
-
     private fun maxLineFormatter(lines: Int): String {
         return if (lines > 0) {
             "${lines}行"
         } else {
             "无限制"
-        }
-    }
-
-    private fun fontsizeFormatter(size: Int): String {
-        return (size / 100f).toString()
-    }
-
-    private fun speedFormatter(speed: Int): String {
-        return (speed / 100f).toString()
-    }
-
-    private fun generateKey(key: String): String {
-        return DanmakuSettingFragment.Companion.generateKey(key, mode)
-    }
-
-    fun update(context: Context) {
-        mPreferencesAdapter?.currentScreen?.let { screen ->
-            val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-            val danmakuShowSP = screen["danmaku_show"] as SwitchPreference
-            danmakuShowSP.checked = prefs.getBoolean("danmaku_show", true)
         }
     }
 
@@ -144,10 +114,22 @@ class DanmakuSettingDetailFragment : Fragment(), DIAware, MyPage {
         block: PreferenceScreen.Builder.() -> Unit
     ): PreferenceScreen {
         val ctx = requireContext()
+        val preferences = DanmakuSettingFragment.getPreferences(mode)
         val prefs = SettingPreferences.run {
             ctx.dataStore.toSharedPreferences(
                 scope = lifecycle.coroutineScope,
                 keysMap = mapOf(
+                    DanmakuSettingFragment.KEY_DANMAKU_SHOW to preferences.show,
+                    DanmakuSettingFragment.KEY_DANMAKU_R2L_SHOW to preferences.r2lShow,
+                    DanmakuSettingFragment.KEY_DANMAKU_FT_SHOW to preferences.ftShow,
+                    DanmakuSettingFragment.KEY_DANMAKU_FB_SHOW to preferences.fbShow,
+                    DanmakuSettingFragment.KEY_DANMAKU_SPECIAL_SHOW to preferences.specialShow,
+                    DanmakuSettingFragment.KEY_DANMAKU_R2L_MAX_LINE to preferences.r2lMaxLine,
+                    DanmakuSettingFragment.KEY_DANMAKU_FT_MAX_LINE to preferences.ftMaxLine,
+                    DanmakuSettingFragment.KEY_DANMAKU_FB_MAX_LINE to preferences.fbMaxLine,
+                    DanmakuSettingFragment.KEY_DANMAKU_FONTSIZE to preferences.fontSize,
+                    DanmakuSettingFragment.KEY_DANMAKU_TRANSPARENT to preferences.opacity,
+                    DanmakuSettingFragment.KEY_DANMAKU_SPEED to preferences.speed,
                 )
             )
         }
@@ -161,56 +143,32 @@ class DanmakuSettingDetailFragment : Fragment(), DIAware, MyPage {
             title = "显示"
         }
 
-        switch(
-            generateKey(
-                DanmakuSettingFragment.Companion.KEY_DANMAKU_SHOW
-            )
-        ) {
+        switch(DanmakuSettingFragment.KEY_DANMAKU_SHOW) {
             title = "弹幕显示"
             defaultValue = true
         }
 
-        switch(
-            generateKey(
-                DanmakuSettingFragment.Companion.KEY_DANMAKU_R2L_SHOW
-            )
-        ) {
+        switch(DanmakuSettingFragment.KEY_DANMAKU_R2L_SHOW) {
             title = "滚动弹幕显示"
             defaultValue = true
         }
 
-        switch(
-            generateKey(
-                DanmakuSettingFragment.Companion.KEY_DANMAKU_FT_SHOW
-            )
-        ) {
+        switch(DanmakuSettingFragment.KEY_DANMAKU_FT_SHOW) {
             title = "顶部弹幕显示"
             defaultValue = true
         }
 
-        switch(
-            generateKey(
-                DanmakuSettingFragment.Companion.KEY_DANMAKU_FB_SHOW
-            )
-        ) {
+        switch(DanmakuSettingFragment.KEY_DANMAKU_FB_SHOW) {
             title = "底部弹幕显示"
             defaultValue = true
         }
 
-        switch(
-            generateKey(
-                DanmakuSettingFragment.Companion.KEY_DANMAKU_SPECIAL_SHOW
-            )
-        ) {
+        switch(DanmakuSettingFragment.KEY_DANMAKU_SPECIAL_SHOW) {
             title = "高级弹幕显示"
             defaultValue = true
         }
 
-        seekBar(
-            generateKey(
-                DanmakuSettingFragment.Companion.KEY_DANMAKU_R2L_MAX_LINE
-            )
-        ) {
+        seekBar(DanmakuSettingFragment.KEY_DANMAKU_R2L_MAX_LINE) {
             title = "滚动弹幕最大行数"
             default = 0
             max = 20
@@ -218,11 +176,7 @@ class DanmakuSettingDetailFragment : Fragment(), DIAware, MyPage {
             formatter = ::maxLineFormatter
         }
 
-        seekBar(
-            generateKey(
-                DanmakuSettingFragment.Companion.KEY_DANMAKU_FT_MAX_LINE
-            )
-        ) {
+        seekBar(DanmakuSettingFragment.KEY_DANMAKU_FT_MAX_LINE) {
             title = "顶部弹幕最大行数"
             default = 0
             max = 20
@@ -230,11 +184,7 @@ class DanmakuSettingDetailFragment : Fragment(), DIAware, MyPage {
             formatter = ::maxLineFormatter
         }
 
-        seekBar(
-            generateKey(
-                DanmakuSettingFragment.Companion.KEY_DANMAKU_FB_MAX_LINE
-            )
-        ) {
+        seekBar(DanmakuSettingFragment.KEY_DANMAKU_FB_MAX_LINE) {
             title = "底部弹幕最大行数"
             default = 0
             max = 20
@@ -247,20 +197,19 @@ class DanmakuSettingDetailFragment : Fragment(), DIAware, MyPage {
         }
 
         val fontsizeSelection = listOf(
-            SelectionItem(key = "0.5", title = "比小更小"),
-            SelectionItem(key = "0.75", title = "小"),
-            SelectionItem(key = "1", title = "正常"),
-            SelectionItem(key = "1.5", title = "大"),
-            SelectionItem(key = "2", title = "比大更大")
+            SelectionItem(key = 0.5f, title = "比小更小"),
+            SelectionItem(key = 0.75f, title = "小"),
+            SelectionItem(key = 1f, title = "正常"),
+            SelectionItem(key = 1.5f, title = "大"),
+            SelectionItem(key = 2f, title = "比大更大")
         )
         singleChoice(
-            generateKey(
-                DanmakuSettingFragment.Companion.KEY_DANMAKU_FONTSIZE
-            ), fontsizeSelection
+            DanmakuSettingFragment.KEY_DANMAKU_FONTSIZE,
+            fontsizeSelection
         ) {
             title = "选择你的尺寸"
             summary = "想要多大的"
-            initialSelection = "1"
+            initialSelection = 1f
         }
 //        seekBar(
 //            generateKey(
@@ -275,11 +224,7 @@ class DanmakuSettingDetailFragment : Fragment(), DIAware, MyPage {
 //            formatter = ::maxLineFormatter
 //        }
 
-        seekBar(
-            generateKey(
-                DanmakuSettingFragment.Companion.KEY_DANMAKU_TRANSPARENT
-            )
-        ) {
+        seekBar(DanmakuSettingFragment.Companion.KEY_DANMAKU_TRANSPARENT) {
             title = "字体透明度"
             default = 100
             max = 100
@@ -292,20 +237,19 @@ class DanmakuSettingDetailFragment : Fragment(), DIAware, MyPage {
         }
 
         val speedSelection = listOf(
-            SelectionItem(key = "2", title = "比慢更慢"),
-            SelectionItem(key = "1.5", title = "慢"),
-            SelectionItem(key = "1", title = "正常"),
-            SelectionItem(key = "0.75", title = "快"),
-            SelectionItem(key = "0.5", title = "比快更快")
+            SelectionItem(key = 2f, title = "比慢更慢"),
+            SelectionItem(key = 1.5f, title = "慢"),
+            SelectionItem(key = 1f, title = "正常"),
+            SelectionItem(key = 0.75f, title = "快"),
+            SelectionItem(key = 0.5f, title = "比快更快")
         )
         singleChoice(
-            generateKey(
-                DanmakuSettingFragment.Companion.KEY_DANMAKU_SPEED
-            ), speedSelection
+            DanmakuSettingFragment.Companion.KEY_DANMAKU_SPEED,
+            speedSelection
         ) {
             title = "选择你的车速"
             summary = "想要更快吗"
-            initialSelection = "1"
+            initialSelection = 1f
         }
     }
 
