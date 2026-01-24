@@ -130,7 +130,6 @@ class PlayerDelegate2(
     private val playerCoroutineScope = PlayerCoroutineScope()
 
     private var lastReportProgress = 0L // 最后记录的播放位置
-    private var lastBackPressedTime = 0L
 
     var playerSource: BasePlayerSource? = null
         private set(value) {
@@ -244,17 +243,6 @@ class PlayerDelegate2(
         }
         if (scaffoldApp.fullScreenPlayer) {
             controller.onBackClick()
-            return true
-        }
-        if (scaffoldApp.showPlayer) {
-            val now = System.currentTimeMillis()
-            if (now - lastBackPressedTime > 2000) {
-                PopTip.show("再按一次退出播放")
-                lastBackPressedTime = now
-            } else {
-                closePlayer()
-                lastBackPressedTime = 0
-            }
             return true
         }
         return false
