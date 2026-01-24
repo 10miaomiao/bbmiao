@@ -8,6 +8,7 @@ import cn.a10miaomiao.bbmiao.comm.MiaoBindingUi
 import cn.a10miaomiao.bbmiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.entity.ResponseData
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
+import com.a10miaomiao.bilimiao.comm.entity.archive.SeriesListInfo
 import com.a10miaomiao.bilimiao.comm.entity.comm.PaginationInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
@@ -32,7 +33,7 @@ class UserSeriesListViewModel(
     val name by lazy { fragment.requireArguments().getString(MainNavArgs.name, "") }
 
     var triggered = false
-    var list = PaginationInfo<SeriesInfo>()
+    var list = PaginationInfo<com.a10miaomiao.bilimiao.comm.entity.archive.SeriesInfo>()
 
     init {
         loadData(1)
@@ -49,7 +50,7 @@ class UserSeriesListViewModel(
                 id,
                 pageNum = pageNum,
                 pageSize = list.pageSize
-            ).awaitCall().json<ResponseData<DataInfo>>()
+            ).awaitCall().json<ResponseData<SeriesListInfo>>()
             if (res.code == 0) {
                 val result = res.requireData()
                 ui.setState {
@@ -98,29 +99,5 @@ class UserSeriesListViewModel(
             loadData()
         }
     }
-
-    data class DataInfo(
-        val items: List<SeriesInfo>,
-        val page: PageInfo,
-    )
-
-    data class SeriesInfo(
-        val type: String,
-        val title: String,
-        val cover: String,
-        val param: String,
-        val uri: String,
-        val goto: String,
-        val count: Int,
-        val mtime: Long,
-        val is_pay: Boolean,
-    )
-
-    data class PageInfo(
-        val page_num: Int,
-        val page_size: Int,
-        val total: Int,
-    )
-
 
 }
