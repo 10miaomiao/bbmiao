@@ -43,7 +43,7 @@ class HomeViewModel(
     var adInfo: MiaoAdInfo.AdBean? = null
 
     init {
-//        loadAdData()
+        loadAdData()
     }
 
     fun getTimeText(): String {
@@ -64,7 +64,7 @@ class HomeViewModel(
             val jsonStr = inputStream.reader().readText()
             return Json.decodeFromString<MiaoAdInfo>(jsonStr)
         }
-        val url = "https://bilimiao.10miaomiao.cn/miao/init?v=$version"
+        val url = "https://bilimiao.10miaomiao.cn/miao/init?app=4&v=$version"
         val res = MiaoHttp.request(url).awaitCall().json<MiaoAdInfo>()
         val cacheJsonStr = Json.encodeToString(res)
         sp.edit().putString("miao_init_request_date", curDate).apply()

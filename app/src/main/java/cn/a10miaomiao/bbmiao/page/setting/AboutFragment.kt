@@ -119,7 +119,7 @@ class AboutFragment : Fragment(), DIAware, MyPage {
             } else {
                 info.versionCode.toLong()
             }
-            val url = "https://bilimiao.10miaomiao.cn/miao/init?v=$curVersionCode"
+            val url = "https://bilimiao.10miaomiao.cn/miao/init?app=4&v=$curVersionCode"
             val res = MiaoHttp.request(url).call().json<MiaoAdInfo>()
             ui.setState {
                 updateChecking = false
@@ -202,7 +202,7 @@ class AboutFragment : Fragment(), DIAware, MyPage {
                             bottomMargin = dip(2)
                         }
                         +textView {
-                            text = "bilimiao 2.x"
+                            text = "bbmiao"
                             setTextColor(config.foregroundColor)
                             textSize = 16f
                         }..lParams(wrapContent, wrapContent)
@@ -259,12 +259,8 @@ class AboutFragment : Fragment(), DIAware, MyPage {
 
 
                 +lineView()..lParams(matchParent, 2)
-                +itemView("项目地址(Github)", "github.com/10miaomiao/bilimiao2") { view ->
-                    openUri("https://github.com/10miaomiao/bilimiao2")
-                }
-                +lineView()..lParams(matchParent, 2)
-                +itemView("项目地址(Gitee)", "gitee.com/10miaomiao/bilimiao2") { view ->
-                    openUri("https://gitee.com/10miaomiao/bilimiao2")
+                +itemView("项目地址", "github.com/10miaomiao/bbmiao") { view ->
+                    openUri("https://github.com/10miaomiao/bbmiao")
                 }
                 +lineView()..lParams(matchParent, 2)
                 +itemView("使用声明", statement)
