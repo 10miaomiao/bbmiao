@@ -22,7 +22,7 @@ import cn.a10miaomiao.bbmiao.comm.recycler.*
 import cn.a10miaomiao.bbmiao.config.ViewStyle
 import cn.a10miaomiao.bbmiao.style.config
 import cn.a10miaomiao.bbmiao.style.resetViewConfig
-import com.a10miaomiao.bilimiao.store.WindowStore
+import cn.a10miaomiao.bbmiao.store.WindowStore
 import com.chad.library.adapter.base.listener.OnItemClickListener
 import org.kodein.di.DI
 import org.kodein.di.DIAware

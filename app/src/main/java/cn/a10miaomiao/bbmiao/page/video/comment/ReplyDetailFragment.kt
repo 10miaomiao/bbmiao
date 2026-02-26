@@ -19,7 +19,7 @@ import cn.a10miaomiao.bbmiao.comm.navigation.FragmentNavigatorBuilder
 import cn.a10miaomiao.bbmiao.comm.navigation.MainNavArgs
 import cn.a10miaomiao.bbmiao.commponents.comment.VideoCommentViewInfo
 import cn.a10miaomiao.bbmiao.style.config
-import com.a10miaomiao.bilimiao.store.WindowStore
+import cn.a10miaomiao.bbmiao.store.WindowStore
 import cn.a10miaomiao.bbmiao.widget.rcImageView
 import org.kodein.di.DI
 import org.kodein.di.DIAware

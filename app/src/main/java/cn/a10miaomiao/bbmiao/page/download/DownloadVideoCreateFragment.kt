@@ -30,7 +30,7 @@ import cn.a10miaomiao.bbmiao.comm.recycler._miaoLayoutManage
 import cn.a10miaomiao.bbmiao.comm.recycler.miaoBindingItemUi
 import cn.a10miaomiao.bbmiao.config.ViewStyle
 import cn.a10miaomiao.bbmiao.style.config
-import com.a10miaomiao.bilimiao.store.WindowStore
+import cn.a10miaomiao.bbmiao.store.WindowStore
 import com.chad.library.adapter.base.listener.OnItemClickListener
 import kotlinx.coroutines.launch
 import org.kodein.di.DI

@@ -26,7 +26,7 @@ import cn.a10miaomiao.bbmiao.comm.recycler._miaoLayoutManage
 import cn.a10miaomiao.bbmiao.comm.recycler.miaoBindingItemUi
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import cn.a10miaomiao.bbmiao.style.config
-import com.a10miaomiao.bilimiao.store.WindowStore
+import cn.a10miaomiao.bbmiao.store.WindowStore
 import com.chad.library.adapter.base.listener.OnItemClickListener
 import org.kodein.di.DI
 import org.kodein.di.DIAware

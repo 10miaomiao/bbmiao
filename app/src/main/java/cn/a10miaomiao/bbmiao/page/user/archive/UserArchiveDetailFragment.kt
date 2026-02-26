@@ -1,15 +1,12 @@
 package cn.a10miaomiao.bbmiao.page.user.archive
 
-import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.coroutineScope
 import androidx.navigation.Navigation
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import cn.a10miaomiao.miao.binding.android.view._bottomPadding
@@ -24,12 +21,8 @@ import cn.a10miaomiao.bbmiao.comm.lazyUiDi
 import cn.a10miaomiao.bbmiao.comm.miaoBindingUi
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
-import com.a10miaomiao.bilimiao.comm.mypage.MyPage
-import com.a10miaomiao.bilimiao.comm.mypage.SearchConfigInfo
 import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
-import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import cn.a10miaomiao.bbmiao.comm.navigation.MainNavArgs
-import cn.a10miaomiao.bbmiao.comm.navigation.openSearch
 import cn.a10miaomiao.bbmiao.comm.recycler.GridAutofitLayoutManager
 import cn.a10miaomiao.bbmiao.comm.recycler._miaoAdapter
 import cn.a10miaomiao.bbmiao.comm.recycler._miaoLayoutManage
@@ -42,13 +35,12 @@ import cn.a10miaomiao.bbmiao.commponents.video.videoItem
 import cn.a10miaomiao.bbmiao.page.search.result.BaseResultFragment
 import cn.a10miaomiao.bbmiao.page.video.VideoInfoFragment
 import cn.a10miaomiao.bbmiao.style.config
-import com.a10miaomiao.bilimiao.store.WindowStore
+import cn.a10miaomiao.bbmiao.store.WindowStore
 import cn.a10miaomiao.bbmiao.widget.menu.CheckPopupMenu
 import com.chad.library.adapter.base.listener.OnItemClickListener
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.DIAware
-import org.kodein.di.bindSingleton
 import org.kodein.di.instance
 import splitties.dimensions.dip
 import splitties.views.backgroundColor

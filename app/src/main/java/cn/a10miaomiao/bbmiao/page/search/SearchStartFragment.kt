@@ -31,7 +31,7 @@ import cn.a10miaomiao.bbmiao.comm.recycler.miaoBindingItemUi
 import cn.a10miaomiao.bbmiao.config.ViewStyle
 import cn.a10miaomiao.bbmiao.style.config
 import cn.a10miaomiao.bbmiao.page.video.VideoInfoFragment
-import com.a10miaomiao.bilimiao.store.WindowStore
+import cn.a10miaomiao.bbmiao.store.WindowStore
 import cn.a10miaomiao.bbmiao.widget.scaffold.getScaffoldView
 import com.chad.library.adapter.base.listener.OnItemClickListener
 import com.google.android.flexbox.FlexDirection

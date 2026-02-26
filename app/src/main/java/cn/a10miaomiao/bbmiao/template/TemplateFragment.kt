@@ -14,7 +14,7 @@ import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import cn.a10miaomiao.bbmiao.comm.navigation.FragmentNavigatorBuilder
 import cn.a10miaomiao.bbmiao.style.config
-import com.a10miaomiao.bilimiao.store.WindowStore
+import cn.a10miaomiao.bbmiao.store.WindowStore
 import org.kodein.di.*
 import splitties.views.dsl.core.*
 

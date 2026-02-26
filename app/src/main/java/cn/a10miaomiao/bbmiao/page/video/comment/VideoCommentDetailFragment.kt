@@ -35,7 +35,6 @@ import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import cn.a10miaomiao.bbmiao.comm.navigation.FragmentNavigatorBuilder
 import cn.a10miaomiao.bbmiao.comm.navigation.MainNavArgs
 import cn.a10miaomiao.bbmiao.comm.recycler.*
-import cn.a10miaomiao.bbmiao.comm.utils.*
 import cn.a10miaomiao.bbmiao.commponents.comment.VideoCommentViewInfo
 import cn.a10miaomiao.bbmiao.commponents.comment.videoCommentView
 import cn.a10miaomiao.bbmiao.commponents.loading.ListState
@@ -43,7 +42,7 @@ import cn.a10miaomiao.bbmiao.commponents.loading.listStateView
 import cn.a10miaomiao.bbmiao.page.user.UserFragment
 import cn.a10miaomiao.bbmiao.style.config
 import cn.a10miaomiao.bbmiao.page.video.VideoInfoFragment
-import com.a10miaomiao.bilimiao.store.WindowStore
+import cn.a10miaomiao.bbmiao.store.WindowStore
 import cn.a10miaomiao.bbmiao.widget.expandabletext.ExpandableTextView
 import cn.a10miaomiao.bbmiao.widget.expandabletext.app.LinkType
 import cn.a10miaomiao.bbmiao.widget.gridimage.NineGridImageView

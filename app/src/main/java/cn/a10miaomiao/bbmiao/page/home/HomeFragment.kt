@@ -27,7 +27,7 @@ import cn.a10miaomiao.bbmiao.style.config
 import cn.a10miaomiao.bbmiao.page.region.RegionFragment
 import cn.a10miaomiao.bbmiao.page.time.TimeSettingFragment
 import cn.a10miaomiao.bbmiao.page.user.UserFragment
-import com.a10miaomiao.bilimiao.store.WindowStore
+import cn.a10miaomiao.bbmiao.store.WindowStore
 import cn.a10miaomiao.bbmiao.widget.wrapInLimitedFrameLayout
 import com.bumptech.glide.Glide
 import com.chad.library.adapter.base.listener.OnItemClickListener

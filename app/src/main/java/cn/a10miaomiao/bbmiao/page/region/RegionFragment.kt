@@ -17,7 +17,6 @@ import androidx.viewpager.widget.ViewPager
 import cn.a10miaomiao.miao.binding.android.view._leftPadding
 import cn.a10miaomiao.miao.binding.android.view._rightPadding
 import cn.a10miaomiao.miao.binding.android.view._topPadding
-import cn.a10miaomiao.bbmiao.MainNavGraph
 import cn.a10miaomiao.bbmiao.R
 import cn.a10miaomiao.bbmiao.comm.*
 import cn.a10miaomiao.bbmiao.comm.dsl.addOnDoubleClickTabListener
@@ -28,7 +27,7 @@ import cn.a10miaomiao.bbmiao.comm.navigation.MainNavArgs
 import cn.a10miaomiao.bbmiao.comm.recycler.RecyclerViewFragment
 import cn.a10miaomiao.bbmiao.page.time.TimeSettingFragment
 import com.a10miaomiao.bilimiao.comm.store.TimeSettingStore
-import com.a10miaomiao.bilimiao.store.WindowStore
+import cn.a10miaomiao.bbmiao.store.WindowStore
 import com.google.android.material.tabs.TabLayout
 import org.kodein.di.DI
 import org.kodein.di.DIAware

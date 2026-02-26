@@ -41,7 +41,7 @@ import cn.a10miaomiao.bbmiao.comm.recycler.miaoBindingItemUi
 import cn.a10miaomiao.bbmiao.comm.views
 import cn.a10miaomiao.bbmiao.config.ViewStyle
 import cn.a10miaomiao.bbmiao.style.config
-import com.a10miaomiao.bilimiao.store.WindowStore
+import cn.a10miaomiao.bbmiao.store.WindowStore
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.DIAware

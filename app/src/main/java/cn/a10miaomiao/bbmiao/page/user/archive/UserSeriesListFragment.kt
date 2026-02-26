@@ -30,7 +30,7 @@ import cn.a10miaomiao.bbmiao.commponents.video.mediaItemView
 import cn.a10miaomiao.bbmiao.page.search.result.BaseResultFragment
 import cn.a10miaomiao.bbmiao.style.config
 import com.a10miaomiao.bilimiao.comm.entity.archive.SeriesInfo
-import com.a10miaomiao.bilimiao.store.WindowStore
+import cn.a10miaomiao.bbmiao.store.WindowStore
 import com.chad.library.adapter.base.listener.OnItemClickListener
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.launch

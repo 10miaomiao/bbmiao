@@ -17,12 +17,10 @@ import cn.a10miaomiao.bbmiao.comm.connectUi
 import cn.a10miaomiao.bbmiao.comm.diViewModel
 import cn.a10miaomiao.bbmiao.comm.lazyUiDi
 import cn.a10miaomiao.bbmiao.comm.miaoBindingUi
-import cn.a10miaomiao.bbmiao.page.user.favourite.UserFavouriteDetailFragment
 import cn.a10miaomiao.miao.binding.android.view._bottomPadding
 import cn.a10miaomiao.miao.binding.android.view._leftPadding
 import cn.a10miaomiao.miao.binding.android.view._rightPadding
 import cn.a10miaomiao.miao.binding.android.view._topPadding
-import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.entity.media.MediaListInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
@@ -37,7 +35,7 @@ import cn.a10miaomiao.bbmiao.commponents.loading.ListState
 import cn.a10miaomiao.bbmiao.commponents.loading.listStateView
 import cn.a10miaomiao.bbmiao.commponents.video.mediaItemView
 import cn.a10miaomiao.bbmiao.style.config
-import com.a10miaomiao.bilimiao.store.WindowStore
+import cn.a10miaomiao.bbmiao.store.WindowStore
 import com.chad.library.adapter.base.listener.OnItemClickListener
 import kotlinx.coroutines.launch
 import org.kodein.di.DI

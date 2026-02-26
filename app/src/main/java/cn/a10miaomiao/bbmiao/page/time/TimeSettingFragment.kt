@@ -28,10 +28,9 @@ import cn.a10miaomiao.bbmiao.comm.navigation.FragmentNavigatorBuilder
 import cn.a10miaomiao.miao.binding.android.view.*
 import cn.a10miaomiao.miao.binding.android.widget._text
 import cn.a10miaomiao.miao.binding.miaoEffect
-import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
-import com.a10miaomiao.bilimiao.store.WindowStore
+import cn.a10miaomiao.bbmiao.store.WindowStore
 import kotlinx.coroutines.launch
 import org.kodein.di.*
 import splitties.dimensions.dip

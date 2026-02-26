@@ -22,15 +22,13 @@ import cn.a10miaomiao.bbmiao.comm.connectStore
 import cn.a10miaomiao.bbmiao.comm.diViewModel
 import cn.a10miaomiao.bbmiao.comm.lazyUiDi
 import cn.a10miaomiao.bbmiao.comm.miaoBindingUi
-import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.mypage.*
 import cn.a10miaomiao.bbmiao.comm.navigation.FragmentNavigatorBuilder
 import cn.a10miaomiao.bbmiao.comm.navigation.MainNavArgs
 import cn.a10miaomiao.bbmiao.comm.navigation.openSearch
 import cn.a10miaomiao.bbmiao.comm.tabLayout
 import cn.a10miaomiao.bbmiao.comm.views
-import com.a10miaomiao.bilimiao.store.WindowStore
-import cn.a10miaomiao.bbmiao.widget.menu.CheckPopupMenu
+import cn.a10miaomiao.bbmiao.store.WindowStore
 import cn.a10miaomiao.bbmiao.widget.wrapInViewPager2Container
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator

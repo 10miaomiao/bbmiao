@@ -47,7 +47,7 @@ import cn.a10miaomiao.bbmiao.comm.recycler.miaoBindingItemUi
 import cn.a10miaomiao.bbmiao.comm.views
 import cn.a10miaomiao.bbmiao.commponents.video.videoItem
 import cn.a10miaomiao.bbmiao.style.config
-import com.a10miaomiao.bilimiao.store.WindowStore
+import cn.a10miaomiao.bbmiao.store.WindowStore
 import cn.a10miaomiao.bbmiao.widget.rcImageView
 import com.chad.library.adapter.base.listener.OnItemClickListener
 import com.google.android.material.card.MaterialCardView

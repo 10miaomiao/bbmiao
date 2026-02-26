@@ -77,7 +77,7 @@ import cn.a10miaomiao.bbmiao.style.config
 import cn.a10miaomiao.bbmiao.page.search.SearchResultFragment
 import cn.a10miaomiao.bbmiao.page.user.UserFragment
 import cn.a10miaomiao.bbmiao.page.video.comment.VideoCommentListFragment
-import com.a10miaomiao.bilimiao.store.WindowStore
+import cn.a10miaomiao.bbmiao.store.WindowStore
 import cn.a10miaomiao.bbmiao.widget._setContent
 import cn.a10miaomiao.bbmiao.widget.expandableTextView
 import cn.a10miaomiao.bbmiao.widget.expandabletext.ExpandableTextView

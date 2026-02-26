@@ -2,7 +2,6 @@ package cn.a10miaomiao.bbmiao.store
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import cn.a10miaomiao.bbmiao.R
 import cn.a10miaomiao.bbmiao.comm.diViewModel
 import com.a10miaomiao.bilimiao.comm.store.FilterStore
 import com.a10miaomiao.bilimiao.comm.store.MessageStore
@@ -11,7 +10,6 @@ import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.comm.store.RegionStore
 import com.a10miaomiao.bilimiao.comm.store.TimeSettingStore
 import com.a10miaomiao.bilimiao.comm.store.UserStore
-import com.a10miaomiao.bilimiao.store.WindowStore
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.bindSingleton
