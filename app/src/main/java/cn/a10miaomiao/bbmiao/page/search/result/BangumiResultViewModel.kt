@@ -1,24 +1,19 @@
 package cn.a10miaomiao.bbmiao.page.search.result
 
 import android.content.Context
-import android.net.Uri
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import bilibili.pagination.Pagination
+import bilibili.polymer.app.search.v1.Item
+import bilibili.polymer.app.search.v1.SearchByTypeRequest
+import bilibili.polymer.app.search.v1.SearchGRPC
 import cn.a10miaomiao.bbmiao.comm.MiaoBindingUi
-import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.comm.PaginationInfo
-import com.a10miaomiao.bilimiao.comm.entity.search.SearchBangumiInfo
-import com.a10miaomiao.bilimiao.comm.entity.search.SearchListInfo
 import cn.a10miaomiao.bbmiao.comm.navigation.MainNavArgs
-import com.a10miaomiao.bilimiao.comm.entity.ResponseData
-import com.a10miaomiao.bilimiao.comm.network.BiliApiService
-import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
-import com.a10miaomiao.bilimiao.comm.store.FilterStore
-import com.kongzue.dialogx.dialogs.PopTip
+import com.a10miaomiao.bilimiao.comm.network.BiliGRPCHttp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
@@ -30,57 +25,54 @@ class BangumiResultViewModel (
     val context: Context by instance()
     val ui: MiaoBindingUi by instance()
     val fragment: Fragment by instance()
-    val filterStore: FilterStore by instance()
 
     val keyword by lazy { fragment.requireArguments().getString(MainNavArgs.text, "") }
 
-    var list = PaginationInfo<SearchBangumiInfo>()
+    var list = PaginationInfo<Item>()
     var triggered = false
+    private var _next = ""
+
+    companion object {
+        private const val SEARCH_TYPE_BANGUMI = 7
+    }
 
     init {
         loadData(1)
     }
 
     private fun loadData(
-        pageNum: Int = list.pageNum
+        pageNum: Int = list.pageNum,
+        next: String = _next
     ) = viewModelScope.launch(Dispatchers.IO){
         try {
             ui.setState {
                 list.loading = true
             }
 
-            val res = BiliApiService.searchApi
-                .searchBangumi(
-                    keyword = keyword,
-                    pageNum = pageNum,
-                    pageSize = list.pageSize
+            val req = SearchByTypeRequest(
+                keyword = keyword,
+                type = SEARCH_TYPE_BANGUMI,
+                pagination = Pagination(
+                    pageSize = list.pageSize,
+                    next = next
                 )
-                .awaitCall()
-                .json<ResponseData<SearchListInfo<SearchBangumiInfo>>>()
-            if (res.code == 0) {
-                var result = res.requireData().items ?: listOf()
-                var totalCount = 0 // 屏蔽前数量
-                if (result.size < list.pageSize) {
-                    ui.setState { list.finished = true }
+            )
+            val result = BiliGRPCHttp.request {
+                SearchGRPC.searchByType(req)
+            }.awaitCall()
+
+            val itemList = result.items
+            _next = result.pagination?.next ?: ""
+            val isFinished = itemList.isEmpty() || _next.isBlank()
+
+            ui.setState {
+                list.finished = isFinished
+                if (pageNum == 1) {
+                    list.data = arrayListOf()
                 }
-                totalCount = result.size
-//                result = result.filter {
-//                    filterStore.filterUpper(it.param)
-//                }
-                ui.setState {
-                    if (pageNum == 1) {
-                        list.data = arrayListOf()
-                    }
-                    list.data.addAll(result)
-                }
-                list.pageNum = pageNum
-                if (list.data.size < 10 && totalCount != result.size) {
-                    _loadData(pageNum + 1)
-                }
-            } else {
-                PopTip.show(res.message)
-                throw Exception(res.message)
+                list.data.addAll(itemList)
             }
+            list.pageNum = pageNum
         } catch (e: Exception) {
             e.printStackTrace()
             ui.setState {
@@ -94,11 +86,6 @@ class BangumiResultViewModel (
         }
     }
 
-
-    private fun _loadData(pageNum: Int = list.pageNum) {
-        loadData(pageNum)
-    }
-
     fun loadMore () {
         val (loading, finished, pageNum) = this.list
         if (!finished && !loading) {
@@ -109,6 +96,7 @@ class BangumiResultViewModel (
     }
 
     fun refreshList() {
+        _next = ""
         ui.setState {
             list = PaginationInfo()
             triggered = true

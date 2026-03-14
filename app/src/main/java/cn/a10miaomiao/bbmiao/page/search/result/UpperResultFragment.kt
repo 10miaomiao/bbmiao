@@ -1,5 +1,6 @@
 package cn.a10miaomiao.bbmiao.page.search.result
 
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,7 +10,8 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import cn.a10miaomiao.miao.binding.android.view._bottomPadding
 import cn.a10miaomiao.bbmiao.comm.*
-import com.a10miaomiao.bilimiao.comm.entity.search.SearchUpperInfo
+import bilibili.polymer.app.search.v1.Item
+import bilibili.polymer.app.search.v1.Item.CardItem
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import cn.a10miaomiao.bbmiao.comm.navigation.MainNavArgs
 import cn.a10miaomiao.bbmiao.comm.recycler.GridAutofitLayoutManager
@@ -20,6 +22,7 @@ import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import cn.a10miaomiao.bbmiao.commponents.loading.ListState
 import cn.a10miaomiao.bbmiao.commponents.loading.listStateView
 import cn.a10miaomiao.bbmiao.commponents.upper.upperItem
+import cn.a10miaomiao.bbmiao.page.user.UserFragment
 import cn.a10miaomiao.bbmiao.style.config
 import cn.a10miaomiao.bbmiao.store.WindowStore
 import com.chad.library.adapter.base.listener.OnItemClickListener
@@ -80,20 +83,29 @@ class UpperResultFragment : BaseResultFragment(), DIAware {
 
     private val handleItemClick = OnItemClickListener { adapter, view, position ->
         val item = viewModel.list.data[position]
-        val nav = Navigation.findNavController(view)
-//        nav.navigateToCompose(UserSpacePage()) {
-//            this.id set item.param
-//        }
+        // 从 URI 中提取用户 ID，如 https://space.bilibili.com/xxxxx
+        val uri = Uri.parse(item.uri)
+        val pathSegments = uri.pathSegments
+        val userId = if (pathSegments.isNotEmpty()) pathSegments.last() else ""
+        val args = UserFragment.createArguments(userId)
+        Navigation.findNavController(view)
+            .navigate(UserFragment.actionId, args)
     }
 
-    val itemUi = miaoBindingItemUi<SearchUpperInfo> { item, index ->
-        upperItem (
-            name = item.title,
-            face = item.cover,
-            remarks = "粉丝：${NumberUtil.converString(item.fans)}   视频数：${NumberUtil.converString(item.archives)}",
-            sign = item.sign,
-        ).apply {
-            layoutParams = ViewGroup.LayoutParams(matchParent, wrapContent)
+    val itemUi = miaoBindingItemUi<Item> { item, index ->
+        val cardItem = item.cardItem
+        if (cardItem is CardItem.Author) {
+            val authorItem = cardItem.value
+            upperItem (
+                name = authorItem.title,
+                face = authorItem.cover,
+                remarks = "粉丝：${NumberUtil.converString(authorItem.fans)}   视频数：${NumberUtil.converString(authorItem.archives)}",
+                sign = authorItem.sign,
+            ).apply {
+                layoutParams = ViewGroup.LayoutParams(matchParent, wrapContent)
+            }
+        } else {
+            upperItem(name = "", face = "", remarks = "", sign = "")
         }
     }
 

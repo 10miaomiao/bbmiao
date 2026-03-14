@@ -5,19 +5,16 @@ import android.net.Uri
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import bilibili.pagination.Pagination
+import bilibili.polymer.app.search.v1.Item
+import bilibili.polymer.app.search.v1.Item.CardItem
+import bilibili.polymer.app.search.v1.SearchAllRequest
+import bilibili.polymer.app.search.v1.SearchGRPC
 import cn.a10miaomiao.bbmiao.comm.MiaoBindingUi
-import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.comm.PaginationInfo
-import com.a10miaomiao.bilimiao.comm.entity.search.SearchArchiveInfo
-import com.a10miaomiao.bilimiao.comm.entity.search.SearchResultInfo
-import com.a10miaomiao.bilimiao.comm.entity.search.SearchVideoInfo
 import cn.a10miaomiao.bbmiao.comm.navigation.MainNavArgs
-import com.a10miaomiao.bilimiao.comm.network.BiliApiService
-import com.a10miaomiao.bilimiao.comm.store.FilterStore
+import com.a10miaomiao.bilimiao.comm.network.BiliGRPCHttp
 import cn.a10miaomiao.bbmiao.widget.menu.CheckPopupMenu
-import com.a10miaomiao.bilimiao.comm.entity.ResponseData
-import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
-import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
@@ -31,22 +28,19 @@ class VideoResultViewModel(
     val context: Context by instance()
     val ui: MiaoBindingUi by instance()
     val fragment: Fragment by instance()
-    val filterStore: FilterStore by instance()
 
     val keyword by lazy { fragment.requireArguments().getString(MainNavArgs.text, "") }
 
-    var list = PaginationInfo<SearchVideoInfo>()
+    var list = PaginationInfo<Item>()
     var triggered = false
+    private var _next = ""
 
 
-    val rankOrdersMenus = listOf<CheckPopupMenu.MenuItemInfo<String>>(
-        CheckPopupMenu.MenuItemInfo("默认排序", "default"),
-        CheckPopupMenu.MenuItemInfo("相关度", "ranklevel"),
-        CheckPopupMenu.MenuItemInfo("新发布", "pubdate"),
-        CheckPopupMenu.MenuItemInfo("播放多", "click"),
-        CheckPopupMenu.MenuItemInfo("弹幕多", "dm"),
-        CheckPopupMenu.MenuItemInfo("评论多", "scores"),
-        CheckPopupMenu.MenuItemInfo("收藏多", "stow"),
+    val rankOrdersMenus = listOf<CheckPopupMenu.MenuItemInfo<Int>>(
+        CheckPopupMenu.MenuItemInfo("默认排序", 0),
+        CheckPopupMenu.MenuItemInfo("新发布", 2),
+        CheckPopupMenu.MenuItemInfo("播放多", 1),
+        CheckPopupMenu.MenuItemInfo("弹幕多", 3),
     )
     var rankOrder = rankOrdersMenus[0]
 
@@ -67,51 +61,49 @@ class VideoResultViewModel(
     }
 
     private fun loadData(
-        pageNum: Int = list.pageNum
+        pageNum: Int = list.pageNum,
+        next: String = _next
     ) = viewModelScope.launch(Dispatchers.IO){
         try {
             ui.setState {
                 list.loading = true
             }
 
-            val res = BiliApiService.searchApi
-                .searchArchive(
-                    keyword = keyword,
-                    order = rankOrder.value,
-                    duration = duration.value,
-                    rid = regionId,
-                    pageNum = pageNum,
-                    pageSize = list.pageSize
+            val durationList = when (duration.value) {
+                1 -> listOf(1)
+                2 -> listOf(2)
+                3 -> listOf(3)
+                4 -> listOf(4)
+                else -> listOf()
+            }.joinToString(",")
+
+            val req = SearchAllRequest(
+                keyword = keyword,
+                order = rankOrder.value,
+                durationList = durationList,
+                tidList = if (regionId > 0) regionId.toString() else "",
+                pagination = Pagination(
+                    pageSize = list.pageSize,
+                    next = next
                 )
-                .awaitCall()
-                .json<ResponseData<SearchResultInfo<SearchArchiveInfo>>>()
-            if (res.code == 0) {
-                var result = res.requireData().items.archive
-                if (result == null) {
-                    ui.setState {
-                        list.finished = true
-                    }
-                } else {
-                    val totalCount = result.size // 屏蔽前数量
-                    result = result.filter {
-                        val title = it.title ?: return@filter false
-                        val mid = it.mid ?: return@filter false
-                        filterStore.filterWord(title)
-                                && filterStore.filterUpper(mid.toLong())
-                    }
-                    ui.setState {
-                        list.finished = totalCount == 0
-                        if (pageNum == 1) {
-                            list.data = arrayListOf()
-                        }
-                        list.data.addAll(result)
-                    }
+            )
+            val result = BiliGRPCHttp.request {
+                SearchGRPC.searchAll(req)
+            }.awaitCall()
+
+            // 过滤只保留视频(稿件)类型
+            val itemList = result.item.filter { it.cardItem is CardItem.Av }
+            _next = result.pagination?.next ?: ""
+            val isFinished = itemList.isEmpty() || _next.isBlank()
+
+            ui.setState {
+                list.finished = isFinished
+                if (pageNum == 1) {
+                    list.data = arrayListOf()
                 }
-                list.pageNum = pageNum
-            } else {
-                PopTip.show(res.message)
-                throw Exception(res.message)
+                list.data.addAll(itemList)
             }
+            list.pageNum = pageNum
         } catch (e: Exception) {
             e.printStackTrace()
             ui.setState {
@@ -125,11 +117,6 @@ class VideoResultViewModel(
         }
     }
 
-
-    private fun _loadData(pageNum: Int = list.pageNum) {
-        loadData(pageNum)
-    }
-
     fun loadMore () {
         val (loading, finished, pageNum) = this.list
         if (!finished && !loading) {
@@ -140,6 +127,7 @@ class VideoResultViewModel(
     }
 
     fun refreshList() {
+        _next = ""
         ui.setState {
             list = PaginationInfo()
             triggered = true

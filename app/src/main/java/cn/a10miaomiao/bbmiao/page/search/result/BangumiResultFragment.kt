@@ -1,18 +1,22 @@
 package cn.a10miaomiao.bbmiao.page.search.result
 
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.navigation.Navigation
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import cn.a10miaomiao.miao.binding.android.view._bottomPadding
 import cn.a10miaomiao.bbmiao.comm.*
-import com.a10miaomiao.bilimiao.comm.entity.search.SearchBangumiInfo
+import bilibili.polymer.app.search.v1.Item
+import bilibili.polymer.app.search.v1.Item.CardItem
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import cn.a10miaomiao.bbmiao.comm.navigation.MainNavArgs
 import cn.a10miaomiao.bbmiao.comm.recycler.*
 import cn.a10miaomiao.bbmiao.commponents.bangumi.bangumiItem
+import cn.a10miaomiao.bbmiao.page.bangumi.BangumiDetailFragment
 import cn.a10miaomiao.bbmiao.commponents.loading.ListState
 import cn.a10miaomiao.bbmiao.commponents.loading.listStateView
 import cn.a10miaomiao.bbmiao.style.config
@@ -75,28 +79,30 @@ class BangumiResultFragment : BaseResultFragment(), DIAware {
 
     private val handleItemClick = OnItemClickListener { adapter, view, position ->
         val item = viewModel.list.data[position]
-//        Navigation.findNavController(view)
-//            .navigateToCompose(BangumiDetailPage()) {
-//                //api原因，从param改为season_id.toString()
-//                id set item.season_id.toString()
-//            }
+        // 从 URI 中提取番剧 ID，如 https://www.bilibili.com/bangumi/play/ssxxxx 或 epxxxx
+        val uri = Uri.parse(item.uri)
+        val pathSegments = uri.pathSegments
+        val bangumiId = if (pathSegments.isNotEmpty()) pathSegments.last() else ""
+        val args = BangumiDetailFragment.createArguments(bangumiId)
+        Navigation.findNavController(view)
+            .navigate(BangumiDetailFragment.actionId, args)
     }
 
-    val itemUi = miaoBindingItemUi<SearchBangumiInfo> { item, index ->
-        bangumiItem (
-            title = item.title,
-            cover = item.cover,
-            desc = item.cat_desc,
-            statusText ="投票人数${item.vote}，评分${item.rating}\n" + item.styles_v2 + '\n' + item.style
-   //api读不到这些参数，暂时换掉
-//            if (item.finish == 1) {
-//                // 是否完结
-//                "${item.newest_season}，${item.total_count}话全"
-//            } else {
-//                "${item.newest_season}，更新至第${item.total_count}话"
-//            },
-        ).apply {
-            layoutParams = ViewGroup.LayoutParams(matchParent, wrapContent)
+    val itemUi = miaoBindingItemUi<Item> { item, index ->
+        val cardItem = item.cardItem
+        if (cardItem is CardItem.Bangumi) {
+            val bangumiItem = cardItem.value
+            bangumiItem (
+                title = bangumiItem.title,
+                cover = bangumiItem.cover,
+                desc = bangumiItem.label,
+                statusText = bangumiItem.styles,
+                isHtml = true,
+            ).apply {
+                layoutParams = ViewGroup.LayoutParams(matchParent, wrapContent)
+            }
+        } else {
+            bangumiItem(title = "", cover = "", desc = "", statusText = "", isHtml = true)
         }
     }
 

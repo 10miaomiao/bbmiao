@@ -9,6 +9,8 @@ import cn.a10miaomiao.bbmiao.comm._network
 import cn.a10miaomiao.bbmiao.comm.views
 import cn.a10miaomiao.bbmiao.style.config
 import cn.a10miaomiao.bbmiao.widget.rcImageView
+import cn.a10miaomiao.miao.binding.miaoEffect
+import com.a10miaomiao.bilimiao.comm.utils.HtmlTagHandler
 import splitties.dimensions.dip
 import splitties.views.dsl.core.*
 import splitties.views.padding
@@ -18,6 +20,7 @@ fun MiaoUI.bangumiItem(
     cover: String? = null,
     statusText: String? = null,
     desc: String? = null,
+    isHtml: Boolean = false,
 ): View {
     return horizontalLayout {
         setBackgroundResource(config.selectableItemBackground)
@@ -40,7 +43,13 @@ fun MiaoUI.bangumiItem(
                         textSize = 16f
                         setTextColor(config.foregroundColor)
 
-                        _text = title ?: ""
+                        if (isHtml) {
+                            miaoEffect(title) {
+                                text = HtmlTagHandler.fromHtml( "<html><body>$it</body></html>")
+                            }
+                        } else {
+                            _text = title ?: ""
+                        }
                     }..lParams(matchParent, matchParent) {
                         weight = 1f
                     }

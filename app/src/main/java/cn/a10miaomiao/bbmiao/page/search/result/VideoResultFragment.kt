@@ -1,5 +1,6 @@
 package cn.a10miaomiao.bbmiao.page.search.result
 
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -12,9 +13,12 @@ import cn.a10miaomiao.miao.binding.android.view._bottomPadding
 import cn.a10miaomiao.bbmiao.R
 import cn.a10miaomiao.bbmiao.comm.*
 import com.a10miaomiao.bilimiao.comm.entity.region.RegionInfo
-import com.a10miaomiao.bilimiao.comm.entity.search.SearchVideoInfo
+import bilibili.polymer.app.search.v1.Item
+import bilibili.polymer.app.search.v1.Item.CardItem
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
+import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
+import com.a10miaomiao.bilimiao.comm.utils.HtmlTagHandler
 import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
 import cn.a10miaomiao.bbmiao.comm.navigation.MainNavArgs
 import cn.a10miaomiao.bbmiao.comm.recycler.*
@@ -136,20 +140,31 @@ class VideoResultFragment : BaseResultFragment(), DIAware {
 
     private val handleItemClick = OnItemClickListener { adapter, view, position ->
         val item = viewModel.list.data[position]
-        val args = VideoInfoFragment.createArguments(item.param)
+        // 从 URI 中提取视频 ID，如 https://www.bilibili.com/video/BVxxx 或 https://www.bilibili.com/video/avxxx
+        val uri = Uri.parse(item.uri)
+        val pathSegments = uri.pathSegments
+        val videoId = if (pathSegments.isNotEmpty()) pathSegments.last() else ""
+        val args = VideoInfoFragment.createArguments(videoId)
         Navigation.findNavController(view)
             .navigate(VideoInfoFragment.actionId, args)
     }
 
-    val itemUi = miaoBindingItemUi<SearchVideoInfo> { item, index ->
-        videoItem (
-            title = item.title,
-            pic = item.cover,
-            upperName = item.author,
-            playNum = item.play,
-            damukuNum = item.danmaku,
-            duration = item.duration,
-        )
+    val itemUi = miaoBindingItemUi<Item> { item, index ->
+        val cardItem = item.cardItem
+        if (cardItem is CardItem.Av) {
+            val avItem = cardItem.value
+            videoItem (
+                title = avItem.title,
+                pic = avItem.cover,
+                upperName = avItem.author,
+                playNum = NumberUtil.converString(avItem.play),
+                damukuNum = NumberUtil.converString(avItem.danmaku),
+                duration = avItem.duration,
+                isHtml = true,
+            )
+        } else {
+            videoItem()
+        }
     }
 
     val ui = miaoBindingUi {
