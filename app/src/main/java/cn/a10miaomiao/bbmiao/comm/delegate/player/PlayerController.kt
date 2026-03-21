@@ -27,6 +27,8 @@ import cn.a10miaomiao.bbmiao.page.bangumi.BangumiPagesFragment
 import cn.a10miaomiao.bbmiao.page.bangumi.BangumiPagesParam
 import cn.a10miaomiao.bbmiao.page.video.VideoPagesFragment
 import cn.a10miaomiao.bbmiao.page.video.VideoPagesParam
+import cn.a10miaomiao.bbmiao.page.player.danmaku.SendDanmakuFragment
+import cn.a10miaomiao.bbmiao.page.player.danmaku.SendDanmakuParam
 import cn.a10miaomiao.bbmiao.widget.player.DanmakuVideoPlayer
 import cn.a10miaomiao.bbmiao.widget.player.VideoPlayerCallBack
 import cn.a10miaomiao.bbmiao.widget.scaffold.ScaffoldView
@@ -552,10 +554,20 @@ class PlayerController(
             views.videoPlayer.onVideoPause()
             views.videoPlayer.hideController()
         }
-//        val nav = Navigation.findNavController(
-//            activity, R.id.nav_bottom_sheet_fragment
-//        )
-//        nav.navigateToCompose(SendDanmakuPage())
+        val sourceIds = delegate.getSourceIds()
+        val title = delegate.playerSource?.title ?: ""
+        val params = SendDanmakuParam(
+            aid = sourceIds.aid,
+            oid = sourceIds.cid,
+            title = title,
+        )
+        val nav = Navigation.findNavController(
+            activity, R.id.nav_bottom_sheet_fragment
+        )
+        nav.navigate(
+            SendDanmakuFragment.actionId,
+            SendDanmakuFragment.createArguments(params)
+        )
     }
 
     fun holdUpPlayer(view: View) {

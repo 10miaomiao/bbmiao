@@ -29,6 +29,7 @@ import cn.a10miaomiao.bbmiao.page.user.favourite.UserFavouriteDetailFragment
 import cn.a10miaomiao.bbmiao.page.user.favourite.UserFavouriteListFragment
 import cn.a10miaomiao.bbmiao.page.video.*
 import cn.a10miaomiao.bbmiao.page.video.comment.*
+import cn.a10miaomiao.bbmiao.page.player.danmaku.SendDanmakuFragment
 import cn.a10miaomiao.bbmiao.page.setting.AboutFragment
 import cn.a10miaomiao.bbmiao.page.setting.SettingFragment
 import cn.a10miaomiao.bbmiao.page.setting.DanmakuSettingFragment
@@ -84,6 +85,8 @@ object MainNavGraph {
             addFragment(VideoCommentDetailFragment::class, VideoCommentDetailFragment.Companion)
             addFragment(ReplyDetailFragment::class, ReplyDetailFragment.Companion)
             addFragment(SendCommentFragment::class, SendCommentFragment.Companion)
+
+            addFragment(SendDanmakuFragment::class, SendDanmakuFragment.Companion)
 
             addFragment(BangumiDetailFragment::class, BangumiDetailFragment.Companion)
             addFragment(BangumiPagesFragment::class, BangumiPagesFragment.Companion)
