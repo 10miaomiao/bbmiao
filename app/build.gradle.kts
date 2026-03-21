@@ -90,6 +90,7 @@ dependencies {
     implementation(libs.pbandk.runtime)
     implementation(libs.glide)
     annotationProcessor(libs.glide.compiler)
+    implementation("org.microg:safe-parcel:1.7.1")
 
     implementation(libs.mojito)
     implementation(libs.mojito.sketch)

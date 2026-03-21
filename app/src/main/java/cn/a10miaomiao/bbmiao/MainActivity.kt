@@ -14,6 +14,7 @@ import android.util.DisplayMetrics
 import android.view.DisplayCutout
 import android.view.View
 import android.view.WindowInsets
+import androidx.activity.result.ActivityResult
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -30,6 +31,7 @@ import androidx.navigation.fragment.NavHostFragment
 import cn.a10miaomiao.bbmiao.activity.SearchActivity
 import cn.a10miaomiao.bbmiao.comm.BiliGeetestUtilImpl
 import cn.a10miaomiao.bbmiao.comm.BilimiaoStatService
+import cn.a10miaomiao.bbmiao.comm.scanner.BilimiaoScanner
 import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
 import cn.a10miaomiao.bbmiao.comm.delegate.helper.StatusBarHelper
 import cn.a10miaomiao.bbmiao.comm.delegate.helper.SupportHelper
@@ -570,6 +572,13 @@ class MainActivity
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
+        when (requestCode) {
+            BilimiaoScanner.REQUEST_CODE -> {
+                BilimiaoScanner.onActivityResult(
+                    ActivityResult(resultCode, data)
+                )
+            }
+        }
         when (resultCode) {
             SearchActivity.REQUEST_CODE -> {
                 val arguments = data?.extras ?: Bundle()

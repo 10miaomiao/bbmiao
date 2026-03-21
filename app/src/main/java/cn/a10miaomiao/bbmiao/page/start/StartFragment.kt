@@ -1,12 +1,10 @@
 package cn.a10miaomiao.bbmiao.page.start
 
 
-import android.Manifest
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.net.Uri
 import android.os.Bundle
-import android.provider.Settings
 import android.text.TextUtils
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -33,8 +31,10 @@ import cn.a10miaomiao.bbmiao.MainActivity
 import cn.a10miaomiao.bbmiao.R
 import cn.a10miaomiao.bbmiao.activity.SearchActivity
 import cn.a10miaomiao.bbmiao.comm.MiaoUI
+import cn.a10miaomiao.bbmiao.comm.BiliNavigation
 import cn.a10miaomiao.bbmiao.comm._network
 import cn.a10miaomiao.bbmiao.comm.connectStore
+import cn.a10miaomiao.bbmiao.comm.scanner.BilimiaoScanner
 import cn.a10miaomiao.bbmiao.comm.delegate.helper.SupportHelper
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import cn.a10miaomiao.bbmiao.comm.delegate.theme.ThemeDelegate
@@ -79,9 +79,6 @@ import org.kodein.di.instance
 import splitties.dimensions.dip
 import splitties.experimental.ExperimentalSplittiesApi
 import splitties.experimental.InternalSplittiesApi
-import splitties.permissions.PermissionRequestResult
-import splitties.permissions.hasPermission
-import splitties.permissions.requestPermission
 import splitties.views.backgroundColor
 import splitties.views.bottomPadding
 import splitties.views.dsl.constraintlayout.constraintLayout
@@ -221,44 +218,34 @@ class StartFragment : Fragment(), DIAware, MyPage {
         return false
     }
 
-    private fun showCameraPermissionDialog() {
-        MaterialAlertDialogBuilder(requireActivity()).apply {
-            setTitle("请授予相机权限")
-            setMessage("扫码功能需授予相机(摄像头)权限，(￣▽￣)\"")
-            setNegativeButton("取消", null)
-            setNeutralButton("手动设置") { dialog, i ->
-                val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-                intent.setData(Uri.parse("package:" + requireActivity().packageName))
-                requireActivity().startActivity(intent)
-            }
-        }.show()
-    }
-
     private fun openQrScanning() {
         val activity = requireActivity()
-//        QRCodeActivity.openScanningActivity(activity) { text ->
-//            if (text.isBlank()) {
-//                PopTip.show("二维码内容为空")
-//            } else if (
-//                !text.startsWith("http://")
-//                && !text.startsWith("https://")
-//                && !text.startsWith("://")
-//            ) {
-//                PopTip.show("扫描内容：$text")
-//            } else {
-//                viewLifecycleOwner.lifecycleScope.launch {
-//                    withStarted {
-//                        val nav = (activity as? MainActivity)?.pointerNav?.navController
-//                            ?: activity.findNavController(R.id.nav_host_fragment)
-//                        if (!BiliNavigation.navigationTo(nav, text)) {
-//                            BiliNavigation.navigationToWeb(activity, text)
-//                        }
-//                    }
-//                }
-//            }
-//        }
         val scaffoldView = activity.getScaffoldView()
         scaffoldView.closeDrawer()
+        BilimiaoScanner.openScanner(
+            activity,
+            config.themeColor,
+        ) { text ->
+            if (text.isBlank()) {
+                PopTip.show("二维码内容为空")
+            } else if (
+                !text.startsWith("http://")
+                && !text.startsWith("https://")
+                && !text.startsWith("://")
+                && !text.startsWith("bilimiao:")
+                && !text.startsWith("bilibili://")
+            ) {
+                PopTip.show("扫描内容：$text")
+            } else {
+                viewLifecycleOwner.lifecycleScope.launch {
+                    val nav = (activity as? MainActivity)?.pointerNav?.navController
+                        ?: activity.findNavController(R.id.nav_host_fragment)
+                    if (!BiliNavigation.navigationTo(nav, text)) {
+                        BiliNavigation.navigationToWeb(activity, text)
+                    }
+                }
+            }
+        }
     }
 
     private val handlePlayerCardDetailClick = View.OnClickListener {
@@ -332,20 +319,8 @@ class StartFragment : Fragment(), DIAware, MyPage {
         scaffoldView.closeDrawer()
     }
 
-    @OptIn(ExperimentalSplittiesApi::class)
     private val handleStartScanClick = View.OnClickListener {
-        if (hasPermission(Manifest.permission.CAMERA)) {
-            openQrScanning()
-        } else {
-            viewLifecycleOwner.lifecycleScope.launch {
-                val result = requestPermission(Manifest.permission.CAMERA)
-                if (result is PermissionRequestResult.Granted) {
-                    openQrScanning()
-                } else if (result is PermissionRequestResult.Denied) {
-                    showCameraPermissionDialog()
-                }
-            }
-        }
+        openQrScanning()
     }
 
     private val handleNavItemClick = OnItemClickListener { adapter, view, position ->
