@@ -50,6 +50,7 @@ import cn.a10miaomiao.bbmiao.R
 import cn.a10miaomiao.bbmiao.page.user.archive.UserArchiveListFragment
 import cn.a10miaomiao.bbmiao.page.user.bangumi.MyBangumiFragment
 import cn.a10miaomiao.bbmiao.page.user.bangumi.UserBangumiFragment
+import cn.a10miaomiao.bbmiao.page.bangumi.BangumiDetailFragment
 import cn.a10miaomiao.bbmiao.page.user.favourite.UserFavouriteDetailFragment
 import cn.a10miaomiao.bbmiao.page.user.favourite.UserFavouriteListFragment
 import cn.a10miaomiao.bbmiao.page.video.VideoInfoFragment
@@ -259,10 +260,9 @@ class UserFragment : Fragment(), DIAware, MyPage {
                 }
                 // 跳转番剧
                 is SpaceInfo.SeasonItem -> {
-//                    Navigation.findNavController(view)
-//                        .navigateToCompose(BangumiDetailPage()) {
-//                            id set item.param
-//                        }
+                    val args = BangumiDetailFragment.createArguments(item.param)
+                    Navigation.findNavController(view)
+                        .navigate(BangumiDetailFragment.actionId, args)
                 }
             }
         }

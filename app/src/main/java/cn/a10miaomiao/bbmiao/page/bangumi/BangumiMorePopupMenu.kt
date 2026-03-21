@@ -79,7 +79,7 @@ class BangumiMorePopupMenu (
                         action = Intent.ACTION_SEND
                         type = "text/plain"
                         putExtra(Intent.EXTRA_SUBJECT, "bilibili番剧分享")
-                        putExtra(Intent.EXTRA_TEXT, "${info.title} https://www.bilibili.com/bangumi/play/ss${info.season_id}")
+                        putExtra(Intent.EXTRA_TEXT, "${info.season_title} https://www.bilibili.com/bangumi/play/ss${info.season_id}")
                     }
                     activity.startActivity(Intent.createChooser(shareIntent, "分享"))
                 } else {

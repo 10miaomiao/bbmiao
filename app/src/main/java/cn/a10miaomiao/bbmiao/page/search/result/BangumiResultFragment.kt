@@ -21,6 +21,7 @@ import cn.a10miaomiao.bbmiao.commponents.loading.ListState
 import cn.a10miaomiao.bbmiao.commponents.loading.listStateView
 import cn.a10miaomiao.bbmiao.style.config
 import cn.a10miaomiao.bbmiao.store.WindowStore
+import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.chad.library.adapter.base.listener.OnItemClickListener
 import org.kodein.di.DI
 import org.kodein.di.DIAware
@@ -79,11 +80,13 @@ class BangumiResultFragment : BaseResultFragment(), DIAware {
 
     private val handleItemClick = OnItemClickListener { adapter, view, position ->
         val item = viewModel.list.data[position]
-        // 从 URI 中提取番剧 ID，如 https://www.bilibili.com/bangumi/play/ssxxxx 或 epxxxx
+        // URI: https://www.bilibili.com/bangumi/play/ss1111/?trackid=...
         val uri = Uri.parse(item.uri)
-        val pathSegments = uri.pathSegments
-        val bangumiId = if (pathSegments.isNotEmpty()) pathSegments.last() else ""
-        val args = BangumiDetailFragment.createArguments(bangumiId)
+        val path = uri.path ?: ""
+        // Extract season ID from path like "/bangumi/play/ss11111/"
+        val match = Regex("/bangumi/play/ss([^/]+)/").find(path)
+        val seasonId = match?.groupValues?.get(1) ?: item.param
+        val args = BangumiDetailFragment.createArguments(seasonId)
         Navigation.findNavController(view)
             .navigate(BangumiDetailFragment.actionId, args)
     }

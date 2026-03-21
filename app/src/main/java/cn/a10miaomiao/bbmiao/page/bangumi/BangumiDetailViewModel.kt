@@ -8,12 +8,12 @@ import cn.a10miaomiao.bbmiao.comm.MiaoBindingUi
 import cn.a10miaomiao.bbmiao.comm.connectUi
 import cn.a10miaomiao.bbmiao.comm.delegate.player.PlayerParamInfo
 import cn.a10miaomiao.bbmiao.comm.navigation.MainNavArgs
+import com.a10miaomiao.bilimiao.comm.entity.ResponseData
 import com.a10miaomiao.bilimiao.comm.entity.ResponseResult
-import com.a10miaomiao.bilimiao.comm.entity.ResultInfo2
-import com.a10miaomiao.bilimiao.comm.entity.bangumi.BangumiInfo
 import com.a10miaomiao.bilimiao.comm.entity.bangumi.EpisodeInfo
-import com.a10miaomiao.bilimiao.comm.entity.bangumi.SeasonSectionInfo
 import com.a10miaomiao.bilimiao.comm.entity.bangumi.SeasonInfo
+import com.a10miaomiao.bilimiao.comm.entity.bangumi.SeasonSectionInfo
+import com.a10miaomiao.bilimiao.comm.entity.bangumi.SeasonV2Info
 import com.a10miaomiao.bilimiao.comm.entity.comm.ToastInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
@@ -40,8 +40,9 @@ class BangumiDetailViewModel(
     private val playerStore by instance<PlayerStore>()
 
     var id: String = fragment.requireArguments().getString(MainNavArgs.id, "")
+    var epId: String = ""
 
-    var detailInfo: BangumiInfo? = null
+    var detailInfo: SeasonV2Info? = null
     var loading = false
     var seasons = listOf<SeasonInfo>()
     var seasonsIndex = -1
@@ -51,6 +52,8 @@ class BangumiDetailViewModel(
     var otherSection = emptyList<SeasonSectionInfo.SectionInfo>()
 
     val isFollow get() = detailInfo?.user_status?.follow == 1
+
+    var episodeId = ""
 
     init {
         loadData()
@@ -67,14 +70,19 @@ class BangumiDetailViewModel(
                 detailInfo = null
                 seasonsIndex = -1
             }
-            val res = BiliApiService.bangumiAPI.seasonInfo(id).awaitCall()
-                .json<ResponseResult<BangumiInfo>>()
+            val res = BiliApiService.bangumiAPI.seasonInfoV2(id, epId).awaitCall()
+                .json<ResponseData<SeasonV2Info>>()
             if (res.code == 0) {
                 val result = res.requireData()
+                val seasonModule = result.modules.find { it.style == "season" }
                 ui.setState {
                     detailInfo = result
-                    seasons = result.seasons
-                    seasonsIndex = result.seasons.indexOfFirst { it.season_id == id }
+                    seasons = seasonModule?.data?.seasons ?: emptyList()
+                    seasonsIndex = seasons.indexOfFirst { it.season_id == result.season_id }
+                }
+                // Update id to match actual season_id from response
+                if (id != result.season_id) {
+                    id = result.season_id
                 }
             } else {
                 withContext(Dispatchers.Main) {
@@ -145,35 +153,39 @@ class BangumiDetailViewModel(
     }
 
     fun followSeason() = viewModelScope.launch(Dispatchers.IO) {
+        val detail = detailInfo ?: return@launch
         try {
-//            val detailInfo = detailInfo ?: return@launch
-//            val mode = if (isFollow) {
-//                2
-//            } else {
-//                1
-//            }
-//            val res = (if (mode == 2) {
-//                BiliApiService.bangumiAPI.cancelFollowSeason(id)
-//            } else {
-//                BiliApiService.bangumiAPI.followSeason(id)
-//            }).awaitCall().gson<ResultInfo2<ToastInfo>>()
-//            if (res.isSuccess) {
-//                detailInfo.user_status.follow = 2 - mode
-//                withContext(Dispatchers.Main) {
-//                    myPage.pageConfig.notifyConfigChanged()
-//                    context.toast(
-//                        if (mode == 1) {
-//                            res.result?.toast ?: "追番成功"
-//                        } else {
-//                            res.result?.toast ?: "已取消追番"
-//                        }
-//                    )
-//                }
-//            } else {
-//                withContext(Dispatchers.Main) {
-//                    context.toast(res.message)
-//                }
-//            }
+            val mode = if (isFollow) {
+                2
+            } else {
+                1
+            }
+            val res = (if (mode == 2) {
+                BiliApiService.bangumiAPI.cancelFollow(detail.season_id)
+            } else {
+                BiliApiService.bangumiAPI.followSeason(detail.season_id)
+            }).awaitCall().json<ResponseResult<ToastInfo>>()
+            if (res.isSuccess) {
+                ui.setState {
+                    detailInfo = detail.copy(
+                        user_status = detail.user_status.copy(follow = if (mode == 1) 1 else 0)
+                    )
+                }
+                withContext(Dispatchers.Main) {
+                    myPage.pageConfig.notifyConfigChanged()
+                    context.toast(
+                        if (mode == 1) {
+                            res.result?.toast ?: "追番成功"
+                        } else {
+                            res.result?.toast ?: "已取消追番"
+                        }
+                    )
+                }
+            } else {
+                withContext(Dispatchers.Main) {
+                    context.toast(res.message)
+                }
+            }
         } catch (e: Exception) {
             withContext(Dispatchers.Main) {
                 context.toast("网络错误")

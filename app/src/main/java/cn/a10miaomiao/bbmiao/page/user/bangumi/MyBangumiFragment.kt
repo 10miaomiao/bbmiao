@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.navigation.Navigation
 import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -13,6 +14,7 @@ import cn.a10miaomiao.bbmiao.comm.diViewModel
 import cn.a10miaomiao.bbmiao.comm.lazyUiDi
 import cn.a10miaomiao.bbmiao.comm.miaoBindingUi
 import cn.a10miaomiao.bbmiao.comm.miaoStore
+import cn.a10miaomiao.bbmiao.page.bangumi.BangumiDetailFragment
 import cn.a10miaomiao.miao.binding.android.view._bottomPadding
 import cn.a10miaomiao.miao.binding.android.view._leftPadding
 import cn.a10miaomiao.miao.binding.android.view._rightPadding
@@ -73,10 +75,8 @@ class MyBangumiFragment: Fragment(), DIAware, MyPage {
 
     private val handleItemClick = OnItemClickListener { adapter, view, position ->
         val item = viewModel.list.data[position]
-//        Navigation.findNavController(view)
-//            .navigateToCompose(BangumiDetailPage()) {
-//                id set item.season_id
-//            }
+        Navigation.findNavController(view)
+            .navigate(BangumiDetailFragment.actionId, BangumiDetailFragment.createArguments(item.season_id))
     }
 
     val itemUi = miaoBindingItemUi<MyBangumiInfo> { item, index ->

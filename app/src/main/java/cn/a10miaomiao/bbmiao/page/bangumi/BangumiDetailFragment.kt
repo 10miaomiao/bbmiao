@@ -203,8 +203,8 @@ class BangumiDetailFragment : Fragment(), DIAware, MyPage {
                 Navigation.findNavController(requireActivity(), R.id.nav_bottom_sheet_fragment)
             val args = BangumiPagesFragment.createArguments(
                 BangumiPagesParam(
-                    sid = info.season_id.toString(),
-                    title = info.title,
+                    sid = info.season_id,
+                    title = info.season_title,
                     episodes = viewModel.mainEpisodes.map {
                         BangumiPagesParam.Episode(
                             aid = it.aid,
@@ -361,7 +361,7 @@ class BangumiDetailFragment : Fragment(), DIAware, MyPage {
                     maxLines = 2
                     ellipsize = TextUtils.TruncateAt.END
                     gravity = gravityCenter
-                    _text = detailInfo?.title ?: ""
+                    _text = detailInfo?.season_title ?: ""
                 }..lParams(wrapContent, wrapContent) {
                     topMargin = config.pagePadding
                 }
@@ -369,7 +369,7 @@ class BangumiDetailFragment : Fragment(), DIAware, MyPage {
                 +textView {
                     textSize = 15f
                     setTextColor(config.foregroundAlpha45Color)
-                    _text = detailInfo?.newest_ep?.desc ?: ""
+                    _text = detailInfo?.new_ep?.desc ?: ""
 
                 }..lParams(wrapContent, wrapContent) {
                     margin = config.dividerSize
@@ -381,13 +381,13 @@ class BangumiDetailFragment : Fragment(), DIAware, MyPage {
                             textSize = 15f
                             setTextColor(config.foregroundAlpha45Color)
                             _text =
-                                "${detailInfo?.rating?.score ?: ""}分/${detailInfo?.rating?.count ?: ""}人评分"
+                                "${detailInfo?.stat?.likes ?: ""} 点赞 / ${detailInfo?.stat?.followers ?: ""} 追番"
                         }..lParams { rightMargin = config.dividerSize }
 
                         +textView {
                             textSize = 15f
                             setTextColor(config.foregroundAlpha45Color)
-                            _text = "${NumberUtil.converString(detailInfo?.stat?.views ?: "")}次观看"
+                            _text = "${NumberUtil.converString(detailInfo?.stat?.play ?: "")}次播放"
                         }
                     }
                 }..lParams(wrapContent, wrapContent)
