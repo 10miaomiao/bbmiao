@@ -119,6 +119,7 @@ object MainNavGraph {
             addFragment(ThemeSettingFragment::class, ThemeSettingFragment.Companion)
             addFragment(VideoSettingFragment::class, VideoSettingFragment.Companion)
             addFragment(FlagsSeetingFragment::class, FlagsSeetingFragment.Companion)
+            addFragment(AutoStopTimerFragment::class, AutoStopTimerFragment.Companion)
         }
     }
 

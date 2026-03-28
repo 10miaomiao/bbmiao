@@ -29,6 +29,9 @@ import cn.a10miaomiao.bbmiao.page.video.VideoPagesFragment
 import cn.a10miaomiao.bbmiao.page.video.VideoPagesParam
 import cn.a10miaomiao.bbmiao.page.player.danmaku.SendDanmakuFragment
 import cn.a10miaomiao.bbmiao.page.player.danmaku.SendDanmakuParam
+import cn.a10miaomiao.bbmiao.page.setting.AutoStopTimerFragment
+import cn.a10miaomiao.bbmiao.page.setting.DanmakuSettingFragment
+import cn.a10miaomiao.bbmiao.page.setting.VideoSettingFragment
 import cn.a10miaomiao.bbmiao.widget.player.DanmakuVideoPlayer
 import cn.a10miaomiao.bbmiao.widget.player.VideoPlayerCallBack
 import cn.a10miaomiao.bbmiao.widget.scaffold.ScaffoldView
@@ -114,6 +117,7 @@ class PlayerController(
             true
         }
         serHoldUpButtonOnClickListener(that::holdUpPlayer)
+        setAutoStopTimerOnClickListener(that::showAutoStopTimerPage)
         videoPlayerCallBack = that
         setGSYVideoProgressListener(that)
         updatePlayerMode(activity.resources.configuration)
@@ -574,6 +578,13 @@ class PlayerController(
         scaffoldApp.holdUpPlayer()
     }
 
+    private fun showAutoStopTimerPage(view: View) {
+        val nav = Navigation.findNavController(
+            activity, R.id.nav_bottom_sheet_fragment
+        )
+        nav.navigate(AutoStopTimerFragment.actionId)
+    }
+
     private fun moreMenuItemClick(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.mini_window -> {
@@ -598,20 +609,17 @@ class PlayerController(
             }
 
             R.id.video_setting -> {
-//                val nav = activity.findNavController(R.id.nav_bottom_sheet_fragment)
-//                nav.navigateToCompose(VideoSettingPage())
+                val nav = activity.findNavController(R.id.nav_bottom_sheet_fragment)
+                nav.navigate(VideoSettingFragment.actionId)
             }
 
             R.id.danmuku_setting -> {
-//                val nav = activity.findNavController(R.id.nav_bottom_sheet_fragment)
-//                val tabName = if (scaffoldApp.fullScreenPlayer){
-//                    SettingPreferences.DanmakuFullMode.name
-//                } else {
-//                    SettingPreferences.DanmakuSmallMode.name
-//                }
-//                nav.navigateToCompose(DanmakuDisplaySettingPage()) {
-//                    name set tabName
-//                }
+                val nav = activity.findNavController(R.id.nav_bottom_sheet_fragment)
+                val index = if (scaffoldApp.fullScreenPlayer) 1 else 0
+                nav.navigate(
+                    DanmakuSettingFragment.actionId,
+                    DanmakuSettingFragment.createArguments(index),
+                )
             }
 
             R.id.scale_1,
@@ -763,6 +771,8 @@ class PlayerController(
     }
 
     private var lastRecordedPosition = 0L
+    private var isTimerInitialized = false
+
     override fun onProgress(
         progress: Long,
         secProgress: Long,
@@ -771,20 +781,34 @@ class PlayerController(
     ) {
         delegate.historyReport(currentPosition)
 
-        //定时关闭
+        //定时关闭 - 只在播放状态时减少计时
         val autoStopDuration = playerStore.autoStopDuration
-        if (autoStopDuration != 0) {
+        if (autoStopDuration > 0 && delegate.isPlaying()) {
+            // 第一次调用时，初始化lastRecordedPosition
+            if (!isTimerInitialized) {
+                lastRecordedPosition = currentPosition
+                isTimerInitialized = true
+                return
+            }
+
             val passedTime = (currentPosition - lastRecordedPosition) / 1000
             if (passedTime in 0L..5L) {
                 var remainTimeNew = autoStopDuration - passedTime.toInt()
                 if (remainTimeNew <= 0) {
-                    //时间被消耗完，暂停。
+                    // 时间被消耗完，暂停
                     remainTimeNew = 0
                     delegate.views.videoPlayer.onVideoPause()
+                    isTimerInitialized = false
                 }
                 playerStore.setAutoStopDuration(remainTimeNew)
+                // 同步倒计时到UI
+                delegate.views.videoPlayer.updateAutoStopTimer(remainTimeNew)
             }
             lastRecordedPosition = currentPosition
+        } else if (autoStopDuration == 0) {
+            // 计时器被重置，隐藏UI
+            delegate.views.videoPlayer.updateAutoStopTimer(0)
+            isTimerInitialized = false
         }
     }
 }

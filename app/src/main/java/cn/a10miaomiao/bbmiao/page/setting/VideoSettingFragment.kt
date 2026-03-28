@@ -9,8 +9,12 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.coroutineScope
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavController
+import androidx.navigation.findNavController
 import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import cn.a10miaomiao.bbmiao.R
 import cn.a10miaomiao.bbmiao.comm.connectUi
 import cn.a10miaomiao.bbmiao.comm.lazyUiDi
 import cn.a10miaomiao.bbmiao.comm.miaoBindingUi
@@ -33,6 +37,8 @@ import cn.a10miaomiao.bbmiao.store.WindowStore
 import de.Maxr1998.modernpreferences.PreferenceScreen
 import de.Maxr1998.modernpreferences.PreferencesAdapter
 import de.Maxr1998.modernpreferences.helpers.categoryHeader
+import de.Maxr1998.modernpreferences.helpers.onClick
+import de.Maxr1998.modernpreferences.helpers.pref
 import de.Maxr1998.modernpreferences.helpers.multiIntChoice
 import de.Maxr1998.modernpreferences.helpers.screen
 import de.Maxr1998.modernpreferences.helpers.seekBar
@@ -188,7 +194,7 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage
                     PLAYER_ORDER_RANDOM to PlayerOrderRandom,
                     PLAYER_FULL_MODE to PlayerFullMode,
                     PLAYER_BOTTOM_PROGRESS_BAR_SHOW to PlayerBottomProgressBarShow,
-//                    PLAYER_AUTO_STOP_DURATION to PlayerA,
+                    PLAYER_AUTO_STOP_DURATION to PlayerAutoStopDuration,
                     // 横屏状态小屏设置
                     PLAYER_SMALL_SHOW_AREA to PlayerSmallShowArea,
                     PLAYER_HOLD_SHOW_AREA to PlayerHoldShowArea,
@@ -383,22 +389,13 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage
         }
         // TODO: 自定义倍速菜单
 
-        seekBar(PLAYER_AUTO_STOP_DURATION) {
+        pref(PLAYER_AUTO_STOP_DURATION) {
             title = "播放器定时关闭"
             summary = "视频播放的时长，而不是实际经过的时间"
-            max = 3600000
-            min = 0
-            default = 0
-            formatter = {
-                val second = value/1000
-                val minute = second/60
-                if(second == 0){
-                    "${value}ms"
-                } else if(minute == 0){
-                    "${second}s"
-                } else {
-                    "${minute}min${second-minute*60}s"
-                }
+            onClick {
+                val nav = requireActivity().findNavController(R.id.nav_bottom_sheet_fragment)
+                nav.navigate(AutoStopTimerFragment.actionId)
+                true
             }
         }
 
