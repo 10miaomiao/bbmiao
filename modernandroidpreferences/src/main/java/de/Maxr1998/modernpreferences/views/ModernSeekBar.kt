@@ -7,7 +7,6 @@ import android.util.AttributeSet
 import androidx.appcompat.widget.AppCompatSeekBar
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
-import androidx.core.view.ViewCompat
 import de.Maxr1998.modernpreferences.R
 
 class ModernSeekBar(
@@ -25,7 +24,7 @@ class ModernSeekBar(
 
             if (value != null) {
                 value.callback = this
-                DrawableCompat.setLayoutDirection(value, ViewCompat.getLayoutDirection(this))
+                DrawableCompat.setLayoutDirection(value, layoutDirection)
                 if (value.isStateful) value.state = drawableState
             }
 
@@ -39,7 +38,7 @@ class ModernSeekBar(
 
             if (value != null) {
                 value.callback = this
-                DrawableCompat.setLayoutDirection(value, ViewCompat.getLayoutDirection(this))
+                DrawableCompat.setLayoutDirection(value, layoutDirection)
                 if (value.isStateful) value.state = drawableState
             }
 

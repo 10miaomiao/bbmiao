@@ -11,6 +11,7 @@ import de.Maxr1998.modernpreferences.preferences.Badge
  * @param key The key of this item, will be committed to preferences if selected
  */
 @Suppress("DataClassPrivateConstructor")
+@ConsistentCopyVisibility
 data class SelectionItem<T : Any> private constructor(
     val key: T,
     @StringRes

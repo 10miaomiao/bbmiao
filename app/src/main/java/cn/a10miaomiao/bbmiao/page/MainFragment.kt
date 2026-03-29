@@ -74,11 +74,11 @@ class MainFragment : Fragment(), DIAware, MyPage {
                     View.GONE
                 }
             },
-            myMenuItem {
-                key = MenuKeys.download
-                title = "下载"
-                iconResource = R.drawable.ic_arrow_downward_gray_24dp
-            },
+//            myMenuItem {
+//                key = MenuKeys.download
+//                title = "下载"
+//                iconResource = R.drawable.ic_arrow_downward_gray_24dp
+//            },
             myMenuItem {
                 key = MenuKeys.setting
                 title = "菜单"
@@ -146,7 +146,7 @@ class MainFragment : Fragment(), DIAware, MyPage {
                         }
                     } else {
                         if (now - backKeyPressedTimes > 2000) {
-                            PopTip.show("再按一次退出bilimiao")
+                            PopTip.show("再按一次退出bbmiao")
                             backKeyPressedTimes = now
                         } else {
                             requireActivity().finish()

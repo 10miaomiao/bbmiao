@@ -4,6 +4,7 @@ import android.content.res.ColorStateList
 import androidx.annotation.StringRes
 import de.Maxr1998.modernpreferences.helpers.DISABLED_RESOURCE_ID
 
+@ConsistentCopyVisibility
 data class Badge internal constructor(
     @StringRes
     val textRes: Int = DISABLED_RESOURCE_ID,
